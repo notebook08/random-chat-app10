@@ -1,6 +1,6 @@
 # AjnabiCam - Random Video Chat
 
-AjnabiCam - Random Video Chat is a WebRTC-based video chat application inspired by Omegle. It allows users to connect and communicate in real-time via audio, video, and text chat. The application leverages WebSockets for signaling and WebRTC for media transmission between peers. Users can join random video chats with other connected users, enjoy features like screen sharing, skipping users, and real-time text messaging.
+AjnabiCam - Random Video Chat is a WebRTC-based video chat application for live chat with ajnabis. It allows users to connect and communicate in real-time via audio, video, and text chat. The application leverages WebSockets for signaling and WebRTC for media transmission between peers. Users can join random video chats with other connected users, enjoy features like screen sharing, skipping users, and real-time text messaging.
 
 ## Features
 
@@ -19,13 +19,13 @@ To install and run this project locally, follow these steps:
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/Shobhit2205/AjnabiCam.git
+    git clone https://github.com/Shobhit2205/AjnabiCam-RandomVideoChat.git
     ```
 
 2. Navigate to the folder:
 
     ```bash
-    cd AjnabiCam
+    cd AjnabiCam-RandomVideoChat
     ```
 
 ### Backend Setup

@@ -26,10 +26,10 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>AjnabiCam - Random Video Chat - Connect, Chat, Collaborate</title>
+        <title>AjnabiCam - Random Video Chat - Live chat with ajnabis</title>
         <meta
           name="description"
-          content="AjnabiCam - Random Video Chat is an innovative video chat application designed to connect users from all around the world for spontaneous and engaging conversations. Built with a focus on ease of use and seamless interaction, AjnabiCam allows users to effortlessly start video calls, share screens, and exchange messages in real-time. Whether you're seeking to meet new people, collaborate on projects, or simply enjoy face-to-face interactions, AjnabiCam delivers a smooth experience with user-friendly features. It prioritizes privacy, utilizing encrypted connections to ensure that all communications are secure. The platform's sleek and modern design, combined with features like quick user pairing, screen sharing, and integrated messaging, makes AjnabiCam a go-to choice for both casual and professional video chatting."
+          content="AjnabiCam - Random Video Chat is an innovative video chat application for live chat with ajnabis from all around the world. Built with a focus on ease of use and seamless interaction, AjnabiCam allows users to effortlessly start video calls, share screens, and exchange messages in real-time. Whether you're seeking to meet new people or simply enjoy face-to-face interactions with strangers, AjnabiCam delivers a smooth experience with user-friendly features. It prioritizes privacy, utilizing encrypted connections to ensure that all communications are secure. The platform's sleek and modern design, combined with features like quick user pairing, screen sharing, and integrated messaging, makes AjnabiCam a go-to choice for connecting with ajnabis worldwide."
         />
         <meta
           name="keywords"
@@ -62,7 +62,7 @@ export default function Home() {
                 AjnabiCam
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-medium">
-                Connect. Chat. Collaborate.
+                Live chat with ajnabis
               </p>
               <div className="flex items-center justify-center gap-2 mt-4">
                 <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce"></div>
@@ -83,7 +83,7 @@ export default function Home() {
               </div>
               
               <p className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 dark:text-gray-300 text-center">
-                AjnabiCam - Random Video Chat connects you with people worldwide for spontaneous conversations. 
+                AjnabiCam - Random Video Chat for live chat with ajnabis worldwide. 
                 Experience seamless video calls, screen sharing, and real-time messaging with 
                 enterprise-grade security and a beautiful, intuitive interface.
               </p>
@@ -115,7 +115,7 @@ export default function Home() {
               >
                 <span className="relative z-10 flex items-center gap-2">
                   <span>🚀</span>
-                  Start Your Journey
+                  Milo Abhi!
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Button>
