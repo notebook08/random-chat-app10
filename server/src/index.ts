@@ -133,6 +133,11 @@ io.on('connection', (socket) => {
         io.to(targetChatToken).emit("message:recieved", {message, sourceChatToken: socket.id});
     });
 
+    socket.on("send:premium:status", ({isPremium, targetChatToken}) => {
+        // console.log(`Premium status from ${socket.id} to ${targetChatToken}: ${isPremium}`);
+        io.to(targetChatToken).emit("partner:premium:status", {isPremium, sourceChatToken: socket.id});
+    });
+
     socket.on("skip", () => {
         const partnerId = userPairs[socket.id];
         

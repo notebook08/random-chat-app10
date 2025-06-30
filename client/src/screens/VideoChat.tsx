@@ -45,6 +45,7 @@ export default function VideoChat() {
   const [isMicOn, setIsMicOn] = useState(true);
   const [showPaywall, setShowPaywall] = useState(false);
   const [isVoiceOnly, setIsVoiceOnly] = useState(false);
+  const [partnerPremium, setPartnerPremium] = useState(false);
 
   const theme = useTheme();
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ export default function VideoChat() {
   }, [setPremium]);
 
   const handleTimeUp = useCallback(() => {
-    alert("⏰ Time's up! Your 15-minute chat session has ended. Upgrade to Premium for unlimited chat time!");
+    alert("⏰ Time's up! Your 15-minute chat session with this person has ended. Upgrade to Premium to continue chatting with them!");
     handleSkip();
   }, []);
 
@@ -261,6 +262,7 @@ export default function VideoChat() {
   const handleUserJoined = useCallback(
     async (remoteId: string) => {
       setRemoteChatToken(remoteId);
+      setPartnerPremium(false); // Reset partner premium status for new connection
       const offer = await peerservice.getOffer();
 
       socket?.emit("offer", { offer, to: remoteId });
@@ -480,6 +482,7 @@ export default function VideoChat() {
 
     setRemoteStream(null);
     setRemoteChatToken(null);
+    setPartnerPremium(false); // Reset partner premium status
 
     peerservice.initPeer();
     setMessagesArray([]);
@@ -532,6 +535,11 @@ export default function VideoChat() {
     socket?.on("peer:nego:needed", handleNegotiationIncomming);
     socket?.on("peer:nego:final", handleNegotiationFinal);
     socket?.on("partnerDisconnected", userDisConnected);
+    
+    // Handle premium status exchange
+    socket?.on("partner:premium:status", ({ isPremium }) => {
+      setPartnerPremium(isPremium);
+    });
 
     return () => {
       socket?.off("user:connect", handleUserJoined);
@@ -540,6 +548,7 @@ export default function VideoChat() {
       socket?.off("peer:nego:needed", handleNegotiationIncomming);
       socket?.off("peer:nego:final", handleNegotiationFinal);
       socket?.off("partnerDisconnected", userDisConnected);
+      socket?.off("partner:premium:status");
     };
   }, [
     handleIncommingAnswer,
@@ -550,6 +559,16 @@ export default function VideoChat() {
     socket,
     userDisConnected
   ]);
+
+  // Send premium status to partner when connected
+  useEffect(() => {
+    if (remoteChatToken && socket) {
+      socket.emit("send:premium:status", { 
+        isPremium, 
+        targetChatToken: remoteChatToken 
+      });
+    }
+  }, [isPremium, remoteChatToken, socket]);
 
   const handleCleanup = useCallback(() => {
     // console.log("Cleaning up...");
@@ -595,6 +614,7 @@ export default function VideoChat() {
         <ChatTimer
           isPremium={isPremium}
           isConnected={remoteChatToken !== null}
+          partnerPremium={partnerPremium}
           onTimeUp={handleTimeUp}
           onUpgrade={handleUpgrade}
         />
@@ -607,6 +627,7 @@ export default function VideoChat() {
           <ChatTimer
             isPremium={isPremium}
             isConnected={remoteChatToken !== null}
+            partnerPremium={partnerPremium}
             onTimeUp={handleTimeUp}
             onUpgrade={handleUpgrade}
           />

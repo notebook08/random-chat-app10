@@ -7,27 +7,33 @@ import { Clock, Crown, Infinity } from "lucide-react";
 interface ChatTimerProps {
   isPremium: boolean;
   isConnected: boolean;
+  partnerPremium: boolean;
   onTimeUp: () => void;
   onUpgrade: () => void;
 }
 
-export default function ChatTimer({ isPremium, isConnected, onTimeUp, onUpgrade }: ChatTimerProps) {
+export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTimeUp, onUpgrade }: ChatTimerProps) {
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
   const [isActive, setIsActive] = useState(false);
+  const hasPremiumAccess = isPremium || partnerPremium;
 
   useEffect(() => {
-    if (isConnected && !isPremium) {
-      setIsActive(true);
-      setTimeLeft(15 * 60); // Reset to 15 minutes
+    if (isConnected) {
+      if (!hasPremiumAccess) {
+        setIsActive(true);
+        setTimeLeft(15 * 60); // Reset to 15 minutes for new session
+      } else {
+        setIsActive(false);
+      }
     } else {
       setIsActive(false);
     }
-  }, [isConnected, isPremium]);
+  }, [isConnected, hasPremiumAccess]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
-    if (isActive && timeLeft > 0 && !isPremium) {
+    if (isActive && timeLeft > 0 && !hasPremiumAccess) {
       interval = setInterval(() => {
         setTimeLeft((time) => {
           if (time <= 1) {
@@ -43,7 +49,7 @@ export default function ChatTimer({ isPremium, isConnected, onTimeUp, onUpgrade 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, timeLeft, isPremium, onTimeUp]);
+  }, [isActive, timeLeft, hasPremiumAccess, onTimeUp]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -70,11 +76,14 @@ export default function ChatTimer({ isPremium, isConnected, onTimeUp, onUpgrade 
             </span>
           </div>
           
-          {isPremium ? (
+          {hasPremiumAccess ? (
             <div className="flex items-center gap-2 text-purple-600">
               <Infinity className="h-5 w-5" />
               <span className="font-bold">Unlimited</span>
               <Crown className="h-4 w-4 text-yellow-500" />
+              {partnerPremium && !isPremium && (
+                <span className="text-xs text-green-600">(Partner Premium)</span>
+              )}
             </div>
           ) : (
             <div className={`font-mono text-xl font-bold ${getTimeColor()}`}>
@@ -83,7 +92,7 @@ export default function ChatTimer({ isPremium, isConnected, onTimeUp, onUpgrade 
           )}
         </div>
         
-        {!isPremium && (
+        {!hasPremiumAccess && (
           <>
             <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
@@ -98,7 +107,7 @@ export default function ChatTimer({ isPremium, isConnected, onTimeUp, onUpgrade 
             {timeLeft < 300 && ( // Show upgrade prompt when < 5 minutes left
               <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg text-center">
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                  ⏰ Time running out? Get unlimited chat time with Premium!
+                  ⏰ Continue this amazing conversation! Get Premium for unlimited time with this person.
                 </p>
                 <Button
                   size="sm"
@@ -111,6 +120,14 @@ export default function ChatTimer({ isPremium, isConnected, onTimeUp, onUpgrade 
               </div>
             )}
           </>
+        )}
+        
+        {hasPremiumAccess && (
+          <div className="mt-2 p-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg text-center">
+            <p className="text-sm text-green-600 dark:text-green-400">
+              ✨ {isPremium ? "You have" : "Your partner has"} Premium - Enjoy unlimited chat time! 💕
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>
