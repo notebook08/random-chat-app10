@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSocket } from "../context/SocketProvider";
+import { usePremium } from "../context/PremiumProvider";
 import peerservice from "../service/peer";
 import ReactPlayer from "react-player";
 import { Button } from "../components/ui/button";
 import Messages from "../components/Messages";
-import { ScreenShare, StepBack, StepForward } from "lucide-react";
+import ChatTimer from "../components/ChatTimer";
+import PremiumPaywall from "../components/PremiumPaywall";
+import { ScreenShare, StepBack, StepForward, Crown } from "lucide-react";
 import { ClipLoader } from "react-spinners"; // Import the spinner
 import { useTheme } from "../components/theme-provider";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../css/VideoChat.css";
 
 interface Offer {
@@ -27,6 +30,8 @@ interface NegotiationDone {
 
 export default function VideoChat() {
   const { socket } = useSocket();
+  const { isPremium, setPremium } = usePremium();
+  const location = useLocation();
   const [remoteChatToken, setRemoteChatToken] = useState<string | null>(null);
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
@@ -38,15 +43,56 @@ export default function VideoChat() {
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [isVoiceOnly, setIsVoiceOnly] = useState(false);
 
   const theme = useTheme();
   const navigate = useNavigate();
 
   const loaderColor = theme.theme === "dark" ? "#D1D5DB" : "#4B5563";
 
+  // Initialize voice-only mode from location state
+  useEffect(() => {
+    const state = location.state as { genderFilter?: string; voiceOnly?: boolean };
+    if (state?.voiceOnly && isPremium) {
+      setIsVoiceOnly(true);
+      setIsCameraOn(false);
+    }
+  }, [location.state, isPremium]);
+
+  const handlePremiumPurchase = useCallback((plan: string) => {
+    // Simulate payment processing
+    console.log(`Processing payment for ${plan} plan`);
+    
+    // Calculate expiry date
+    const now = new Date();
+    const expiry = new Date(now);
+    if (plan === "weekly") {
+      expiry.setDate(now.getDate() + 7);
+    } else {
+      expiry.setMonth(now.getMonth() + 1);
+    }
+    
+    // Set premium status
+    setPremium(true, expiry);
+    setShowPaywall(false);
+    
+    // Show success message
+    alert(`🎉 Welcome to Premium! Your ${plan} subscription is now active until ${expiry.toLocaleDateString()}`);
+  }, [setPremium]);
+
+  const handleTimeUp = useCallback(() => {
+    alert("⏰ Time's up! Your 15-minute chat session has ended. Upgrade to Premium for unlimited chat time!");
+    handleSkip();
+  }, []);
+
+  const handleUpgrade = useCallback(() => {
+    setShowPaywall(true);
+  }, []);
+
   const getUserStream = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
+      video: !isVoiceOnly,
       audio: {
         echoCancellation: true,
         noiseSuppression: true,
@@ -58,7 +104,7 @@ export default function VideoChat() {
     });
     // const processedStream = processAudio(stream);
     setMyStream(stream);
-  }, []);
+  }, [isVoiceOnly]);
 
   useEffect(() => {
     getUserStream();
@@ -544,21 +590,51 @@ export default function VideoChat() {
 
   return (
     <div className="flex flex-col lg:flex-row w-screen bg-gradient-to-b from-gray-200 to-gray-400 dark:from-gray-800 dark:to-gray-900 transition-colors duration-300">
+      {/* Timer - Show at top on mobile, side on desktop */}
+      <div className="lg:hidden w-full p-4">
+        <ChatTimer
+          isPremium={isPremium}
+          isConnected={remoteChatToken !== null}
+          onTimeUp={handleTimeUp}
+          onUpgrade={handleUpgrade}
+        />
+      </div>
+
       {/* Left Side */}
       <div className="lg:w-[450px] w-full lg:h-[calc(100vh-64px)] h-auto border-b lg:border-b-0 lg:border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden">
+        {/* Desktop Timer */}
+        <div className="hidden lg:block p-4 border-b border-gray-200 dark:border-gray-700">
+          <ChatTimer
+            isPremium={isPremium}
+            isConnected={remoteChatToken !== null}
+            onTimeUp={handleTimeUp}
+            onUpgrade={handleUpgrade}
+          />
+        </div>
         {/* My Stream */}
         {myStream ? (
           <div className="relative w-full h-64 lg:h-1/2">
-            <ReactPlayer
-              className="absolute inset-0 rounded-lg"
-              url={myStream}
-              playing
-              muted
-              width="100%"
-              height="100%"
-            />
+            {isVoiceOnly ? (
+              <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg shadow-md">
+                <div className="text-6xl mb-4">🎙️</div>
+                <p className="text-white text-lg font-semibold">Voice Only Mode</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Crown className="h-4 w-4 text-yellow-400" />
+                  <span className="text-yellow-400 text-sm font-medium">Premium</span>
+                </div>
+              </div>
+            ) : (
+              <ReactPlayer
+                className="absolute inset-0 rounded-lg"
+                url={myStream}
+                playing
+                muted
+                width="100%"
+                height="100%"
+              />
+            )}
             <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black via-transparent to-transparent p-3 text-white text-sm rounded-tl-lg">
-              My Stream
+              {isVoiceOnly ? "Your Voice" : "My Stream"}
             </div>
           </div>
         ) : (
@@ -573,16 +649,24 @@ export default function VideoChat() {
         {/* Remote Stream */}
         {remoteStream ? (
           <div className="relative w-full h-64 lg:h-1/2">
-            <ReactPlayer
-              className="absolute inset-0 rounded-lg"
-              url={remoteStream}
-              playing
-              muted={false}
-              width="100%"
-              height="100%"
-            />
+            {isVoiceOnly ? (
+              <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-blue-500 to-teal-500 rounded-lg shadow-md">
+                <div className="text-6xl mb-4">🎧</div>
+                <p className="text-white text-lg font-semibold">Listening...</p>
+                <p className="text-blue-100 text-sm mt-1">Voice Only Mode</p>
+              </div>
+            ) : (
+              <ReactPlayer
+                className="absolute inset-0 rounded-lg"
+                url={remoteStream}
+                playing
+                muted={false}
+                width="100%"
+                height="100%"
+              />
+            )}
             <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black via-transparent to-transparent p-3 text-white text-sm rounded-tl-lg">
-              Remote Stream
+              {isVoiceOnly ? "Partner's Voice" : "Remote Stream"}
             </div>
           </div>
         ) : (
@@ -655,6 +739,12 @@ export default function VideoChat() {
           )}
         </div>
       </div>
+      
+      <PremiumPaywall
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        onPurchase={handlePremiumPurchase}
+      />
     </div>
   );
 }

@@ -22,26 +22,50 @@ const io = new Server(server, {
 
 interface User {
     socketId: string;
+    isPremium?: boolean;
+    genderFilter?: string;
+    voiceOnly?: boolean;
+    joinTime?: number;
 }
 
-let waitingUser: User | null = null;
+let waitingUsers: User[] = [];
 const userPairs: Record<string, string> = {};
+const userProfiles: Record<string, User> = {};
 
-const matchUser = (socket: any) => {
-    if(waitingUser !== null){
-        if(!socket.id) return;
+const matchUser = (socket: any, userProfile: User) => {
+    if(!socket.id) return;
+
+    // Find a compatible user in waiting list
+    const compatibleUserIndex = waitingUsers.findIndex(waitingUser => {
+        // Basic matching - if neither has gender filter, they can match
+        if (!userProfile.genderFilter || userProfile.genderFilter === "any") {
+            if (!waitingUser.genderFilter || waitingUser.genderFilter === "any") {
+                return true;
+            }
+        }
+        
+        // If one has premium gender filter, check compatibility
+        // For demo purposes, we'll just match any users
+        // In real implementation, you'd need to store user gender info
+        return true;
+    });
+
+    if (compatibleUserIndex !== -1) {
+        const waitingUser = waitingUsers[compatibleUserIndex];
+        
+        // Remove from waiting list
+        waitingUsers.splice(compatibleUserIndex, 1);
+        
+        // Create pair
         userPairs[socket.id] = waitingUser.socketId;
         userPairs[waitingUser.socketId] = socket.id;
 
         socket.emit("user:connect", waitingUser.socketId);
 
-        // io.to(waitingUser.socketId).emit("user:connect", socket.id);
-
-        waitingUser = null;
-
-    }
-    else{
-        waitingUser = {socketId: socket.id};
+        console.log(`Matched ${socket.id} with ${waitingUser.socketId}`);
+    } else {
+        // Add to waiting list
+        waitingUsers.push(userProfile);
         console.log(`${socket.id} is waiting for pair`);
     }
 }
@@ -49,7 +73,30 @@ const matchUser = (socket: any) => {
 io.on('connection', (socket) => {
     console.log(`Socket connected ${socket.id}`);
 
-    matchUser(socket);
+    // Handle user profile setup
+    socket.on("user:profile", (profile: { isPremium?: boolean; genderFilter?: string; voiceOnly?: boolean }) => {
+        const userProfile: User = {
+            socketId: socket.id,
+            isPremium: profile.isPremium || false,
+            genderFilter: profile.genderFilter || "any",
+            voiceOnly: profile.voiceOnly || false,
+            joinTime: Date.now()
+        };
+        
+        userProfiles[socket.id] = userProfile;
+        matchUser(socket, userProfile);
+    });
+
+    // Default matching for users without profile
+    const defaultProfile: User = {
+        socketId: socket.id,
+        isPremium: false,
+        genderFilter: "any",
+        voiceOnly: false,
+        joinTime: Date.now()
+    };
+    userProfiles[socket.id] = defaultProfile;
+    matchUser(socket, defaultProfile);
 
     // socket.on("user:connect", ({remoteId}) => {
     //     console.log("user:connect backend");
@@ -87,42 +134,52 @@ io.on('connection', (socket) => {
     });
 
     socket.on("skip", () => {
-        // console.log(`${socket.id} skipped the current pair`);
-
-
         const partnerId = userPairs[socket.id];
-        // console.log(partnerId);
-        // console.log(socket.id);
+        
         if (partnerId) {
             io.to(partnerId).emit("skipped");
             delete userPairs[socket.id];
             delete userPairs[partnerId];
 
-            // Mark both users as waiting
-            matchUser(io.sockets.sockets.get(partnerId));
+            // Re-match both users
+            const partnerSocket = io.sockets.sockets.get(partnerId);
+            if (partnerSocket) {
+                const partnerProfile = userProfiles[partnerId];
+                if (partnerProfile) {
+                    matchUser(partnerSocket, partnerProfile);
+                }
+            }
         }
 
-        // Mark the current socket as waiting
-        matchUser(socket);
+        // Re-match current user
+        const currentProfile = userProfiles[socket.id];
+        if (currentProfile) {
+            matchUser(socket, currentProfile);
+        }
     });
 
     socket.on("disconnect", () => {
-        // console.log(`User disconnected ${socket.id}`);
-
         const partnerId = userPairs[socket.id];
-        // console.log(partnerId);
-        // console.log(socket.id);
+        
         if(partnerId){
             io.to(partnerId).emit("partnerDisconnected");
             delete userPairs[socket.id];
             delete userPairs[partnerId];
-            matchUser(io.sockets.sockets.get(partnerId));
+            
+            const partnerSocket = io.sockets.sockets.get(partnerId);
+            if (partnerSocket) {
+                const partnerProfile = userProfiles[partnerId];
+                if (partnerProfile) {
+                    matchUser(partnerSocket, partnerProfile);
+                }
+            }
         }
 
-        if(waitingUser?.socketId == socket.id){
-            waitingUser = null;
-        }
-
+        // Remove from waiting list
+        waitingUsers = waitingUsers.filter(user => user.socketId !== socket.id);
+        
+        // Clean up user profile
+        delete userProfiles[socket.id];
     })
 })
 

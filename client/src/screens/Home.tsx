@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "../components/ui/button";
 import { useSocket } from "../context/SocketProvider";
 import { io } from "socket.io-client";
@@ -6,10 +6,22 @@ import { useNavigate } from "react-router-dom";
 import LogoContent from "../components/LogoContent";
 // import { Github } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { Crown } from "lucide-react";
+
+// Premium Feature Components (assumed implementations)
+import GenderFilter from "../components/GenderFilter";
+import VoiceOnlyToggle from "../components/VoiceOnlyToggle";
+import PremiumPaywall from "../components/PremiumPaywall";
 
 export default function Home() {
   const { socket, setSocket } = useSocket();
   const navigate = useNavigate();
+
+  // Premium State
+  const [isPremium, setIsPremium] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [selectedGender, setSelectedGender] = useState<"male" | "female" | null>(null);
+  const [isVoiceOnly, setIsVoiceOnly] = useState(false);
 
   const handleStartCall = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -22,6 +34,17 @@ export default function Home() {
     },
     [setSocket, socket, navigate]
   );
+
+  const handleUpgrade = () => {
+    setShowPaywall(true);
+  };
+
+  const handlePremiumPurchase = () => {
+    // Simulate successful purchase and set premium status
+    setIsPremium(true);
+    setShowPaywall(false);
+  };
+
 
   return (
     <>
@@ -40,7 +63,7 @@ export default function Home() {
         <div className="w-full flex flex-col lg:flex-row justify-center items-center lg:justify-evenly mx-auto">
           {/* Logo Section */}
           <div className="flex flex-col items-center justify-center text-center mb-8 lg:mb-0 w-full lg:w-auto">
-            <div className="flex items-center justify-center mb-8 transform hover:scale-110 transition-transform duration-300">
+            <div className="flex items-center justify-center mb-8 relative transform hover:scale-110 transition-transform duration-300">
               <div className="relative">
                 <svg
                   version="1.0"
@@ -56,6 +79,12 @@ export default function Home() {
                 {/* Animated pulse effect */}
                 <div className="absolute inset-0 bg-teal-400 opacity-20 rounded-full animate-pulse"></div>
               </div>
+              {isPremium && (
+                <div className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                  <Crown className="h-3 w-3" />
+                  PREMIUM
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent mb-3 animate-fade-in">
@@ -81,7 +110,7 @@ export default function Home() {
                 </h2>
                 <div className="w-20 h-1 bg-gradient-to-r from-teal-500 to-blue-500 mx-auto rounded-full"></div>
               </div>
-              
+
               <p className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 dark:text-gray-300 text-center">
                 AjnabiCam - Random Video Chat for live chat with ajnabis worldwide. 
                 Experience seamless video calls, screen sharing, and real-time messaging with 
@@ -107,6 +136,22 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Premium Controls */}
+            <div className="space-y-4 mb-6">
+              <GenderFilter
+                isPremium={isPremium}
+                onGenderSelect={setSelectedGender}
+                onUpgrade={handleUpgrade}
+              />
+
+              <VoiceOnlyToggle
+                isPremium={isPremium}
+                isVoiceOnly={isVoiceOnly}
+                onToggle={setIsVoiceOnly}
+                onUpgrade={handleUpgrade}
+              />
+            </div>
+
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6 md:mb-8">
               <Button
@@ -115,24 +160,20 @@ export default function Home() {
               >
                 <span className="relative z-10 flex items-center gap-2">
                   <span>🚀</span>
-                  Milo Abhi!
+                  {isVoiceOnly ? "🎙️ Start Voice Chat" : "Milo Abhi!"}
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Button>
-              {/* <a
-                href="https://github.com/Shobhit2205/AjnabiCam"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto"
-              >
+              {!isPremium && (
                 <Button
+                  onClick={handleUpgrade}
                   variant="outline"
                   className="w-full py-3 sm:py-4 text-base sm:text-lg font-semibold tracking-wider shadow-lg transition-transform duration-300 hover:scale-105 flex items-center justify-center gap-2 border-gray-600 rounded-xl"
                 >
-                  <Github size={24} />
-                  Contribute on GitHub
+                  <Crown size={24} />
+                  Get Premium - Unlock All Features!
                 </Button>
-              </a> */}
+              )}
             </div>
 
             <div className="text-xs sm:text-sm text-center mt-6 text-gray-500 dark:text-gray-400">
@@ -141,6 +182,12 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      <PremiumPaywall
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        onPurchase={handlePremiumPurchase}
+      />
     </>
   );
 }
