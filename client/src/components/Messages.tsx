@@ -5,7 +5,7 @@ import { Input } from "./ui/input";
 import { Send } from "lucide-react";
 
 interface MessageProps{
-    remoteSocketId: string | null;
+    remoteChatToken: string | null;
     messagesArray: Array<{ sender: string; message: string; }>;
     setMessagesArray: React.Dispatch<React.SetStateAction<Array<{ sender: string; message: string }>>>;
 }
@@ -15,7 +15,7 @@ interface RecievedMessageProps {
     from: string;
 }
 
-export default function Messages({remoteSocketId, messagesArray, setMessagesArray}: MessageProps) {
+export default function Messages({remoteChatToken, messagesArray, setMessagesArray}: MessageProps) {
     const {socket} = useSocket();
     const [message, setMessage] = useState<string>('');
 
@@ -31,8 +31,8 @@ export default function Messages({remoteSocketId, messagesArray, setMessagesArra
     }, [messagesArray]);
 
     const handleSendMessage = () => {
-        // Prevent sending empty messages or if remoteSocketId is null
-        if (!message.trim() || !remoteSocketId) return;
+        // Prevent sending empty messages or if remoteChatToken is null
+        if (!message.trim() || !remoteChatToken) return;
 
         // Add message to the messagesArray state with 'You' as the sender
         setMessagesArray((prev) => [...prev, {sender: 'You', message: message.trim()}]);
@@ -41,7 +41,7 @@ export default function Messages({remoteSocketId, messagesArray, setMessagesArra
         setMessage('');
         
         // Emit the message to the socket
-        socket?.emit("send:message", {message: message.trim(), to: remoteSocketId});
+        socket?.emit("send:message", {message: message.trim(), targetChatToken: remoteChatToken});
 
         // Set focus back to the input field for easier typing (FIX #1)
         inputRef.current?.focus();
@@ -90,13 +90,13 @@ export default function Messages({remoteSocketId, messagesArray, setMessagesArra
                     onChange={(e) => setMessage(e.target.value)} 
                     onKeyDown={handleKeyDown}
                     aria-label="Message input" // Add aria-label for accessibility (FIX #3)
-                    disabled={!remoteSocketId} // Disable input when no remoteSocketId (FIX #4)
+                    disabled={!remoteChatToken} // Disable input when no remoteChatToken (FIX #4)
                     className="flex-1 bg-gray-200 dark:bg-gray-900"
                 />
                 <Button 
                     className="gap-2" 
                     onClick={handleSendMessage} 
-                    disabled={!remoteSocketId || !message.trim()} // Disable if no message or no connection
+                    disabled={!remoteChatToken || !message.trim()} // Disable if no message or no connection
                     aria-label="Send message" // Add aria-label for accessibility (FIX #3)
                 >
                     <Send size={18} /> Send

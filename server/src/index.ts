@@ -76,20 +76,20 @@ io.on('connection', (socket) => {
         io.to(to).emit("peer:nego:final", {answer, to: socket.id});
     });
 
-    socket.on('ice-candidate', ({ candidate, to }) => {
-        // console.log(`Relaying ICE candidate to ${to}`);
-        io.to(to).emit('ice-candidate', { candidate });
+    socket.on("ice-candidate", ({candidate, targetChatToken}) => {
+        // console.log(`Sending ICE candidate from ${socket.id} to ${targetChatToken}`);
+        io.to(targetChatToken).emit("ice-candidate", {candidate, sourceChatToken: socket.id});
     });
 
-    socket.on("send:message", ({message, to}) => {
-        // console.log(message, to);
-        io.to(to).emit("message:recieved", {message, from: socket.id});
+    socket.on("send:message", ({message, targetChatToken}) => {
+        // console.log(`Message from ${socket.id} to ${targetChatToken}: ${message}`);
+        io.to(targetChatToken).emit("message:recieved", {message, sourceChatToken: socket.id});
     });
 
     socket.on("skip", () => {
         // console.log(`${socket.id} skipped the current pair`);
-        
-        
+
+
         const partnerId = userPairs[socket.id];
         // console.log(partnerId);
         // console.log(socket.id);
@@ -122,7 +122,7 @@ io.on('connection', (socket) => {
         if(waitingUser?.socketId == socket.id){
             waitingUser = null;
         }
-       
+
     })
 })
 

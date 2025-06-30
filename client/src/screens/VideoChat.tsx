@@ -27,7 +27,7 @@ interface NegotiationDone {
 
 export default function VideoChat() {
   const { socket } = useSocket();
-  const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
+  const [remoteChatToken, setRemoteChatToken] = useState<string | null>(null);
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
@@ -70,7 +70,7 @@ export default function VideoChat() {
       const sender = peerservice.peer
         .getSenders()
         .find((s) => s.track?.kind === "video");
-  
+
       if (videoTrack && sender) {
         if (isCameraOn) {
           sender.replaceTrack(null); // Disable video by replacing with null
@@ -92,14 +92,14 @@ export default function VideoChat() {
       }
     }
   }, [myStream, isCameraOn]);
-  
+
   const toggleMic = useCallback(() => {
     if (myStream) {
       const audioTrack = myStream.getAudioTracks()[0];
       const sender = peerservice.peer
         .getSenders()
         .find((s) => s.track?.kind === "audio");
-  
+
       if (audioTrack && sender) {
         if (isMicOn) {
           sender.replaceTrack(null); // Disable audio by replacing with null
@@ -121,7 +121,7 @@ export default function VideoChat() {
       }
     }
   }, [myStream, isMicOn]);
-  
+
 
   const sendStream = useCallback(() => {
     if (myStream) {
@@ -167,7 +167,7 @@ export default function VideoChat() {
       // Renegotiate after stopping screen sharing
       if (peerservice.peer.signalingState === "stable") {
         const offer = await peerservice.getOffer();
-        socket?.emit("peer:nego:needed", { offer, to: remoteSocketId });
+        socket?.emit("peer:nego:needed", { offer, targetChatToken: remoteChatToken });
       }
     } else {
       try {
@@ -191,13 +191,13 @@ export default function VideoChat() {
 
         if (peerservice.peer.signalingState === "stable") {
           const offer = await peerservice.getOffer();
-          socket?.emit("peer:nego:needed", { offer, to: remoteSocketId });
+          socket?.emit("peer:nego:needed", { offer, targetChatToken: remoteChatToken });
         }
       } catch (error) {
         console.error("Error sharing screen:", error);
       }
     }
-  }, [isScreenSharing, myStream, screenStream, remoteSocketId, socket]);
+  }, [isScreenSharing, myStream, screenStream, remoteChatToken, socket]);
 
   const setAudioBandwidth = (peerConnection: RTCPeerConnection) => {
     const sender = peerConnection
@@ -214,7 +214,7 @@ export default function VideoChat() {
 
   const handleUserJoined = useCallback(
     async (remoteId: string) => {
-      setRemoteSocketId(remoteId);
+      setRemoteChatToken(remoteId);
       const offer = await peerservice.getOffer();
 
       socket?.emit("offer", { offer, to: remoteId });
@@ -225,7 +225,7 @@ export default function VideoChat() {
 
   const handleIncommingOffer = useCallback(
     async ({ offer, from }: Offer) => {
-      setRemoteSocketId(from);
+      setRemoteChatToken(from);
       await getUserStream();
 
       if (peerservice.peer.signalingState === "stable") {
@@ -281,7 +281,7 @@ export default function VideoChat() {
 
         socket?.emit("peer:nego:needed", {
           offer: modifiedOffer,
-          to: remoteSocketId
+          targetChatToken: remoteChatToken
         });
 
         // console.log("Negotiation initiated with modified SDP.");
@@ -289,7 +289,7 @@ export default function VideoChat() {
     } else {
       console.warn("Peer is not in a stable state for negotiation.");
     }
-  }, [remoteSocketId, socket]);
+  }, [remoteChatToken, socket]);
 
   // const handleNegotiationNeeded = useCallback(async () => {
 
@@ -374,7 +374,7 @@ export default function VideoChat() {
     setFlag(false);
 
     setRemoteStream(null);
-    setRemoteSocketId(null);
+    setRemoteChatToken(null);
 
     socket?.emit("skip");
   }, [socket]);
@@ -433,7 +433,7 @@ export default function VideoChat() {
     }
 
     setRemoteStream(null);
-    setRemoteSocketId(null);
+    setRemoteChatToken(null);
 
     peerservice.initPeer();
     setMessagesArray([]);
@@ -453,11 +453,11 @@ export default function VideoChat() {
         // console.log("Sending ICE candidate:", event.candidate);
         socket?.emit("ice-candidate", {
           candidate: event.candidate,
-          to: remoteSocketId
+          to: remoteChatToken
         });
       }
     };
-  }, [socket, remoteSocketId]);
+  }, [socket, remoteChatToken]);
 
   useEffect(() => {
     socket?.on("ice-candidate", (data) => {
@@ -609,11 +609,11 @@ export default function VideoChat() {
           </Button>
           <Button
             className={`flex-1 p-2 gap-2 bg-blue-600 text-white rounded-md ${
-              remoteSocketId === null ? "opacity-50 cursor-not-allowed" : ""
+              remoteChatToken === null ? "opacity-50 cursor-not-allowed" : ""
             }`}
             size={"icon"}
             onClick={handleSkip}
-            disabled={remoteSocketId === null}
+            disabled={remoteChatToken === null}
           >
             <StepForward size={18} />
             <span className="hidden sm:inline">Skip</span>
@@ -648,7 +648,7 @@ export default function VideoChat() {
             />
           ) : (
             <Messages
-              remoteSocketId={remoteSocketId}
+              remoteSocketId={remoteChatToken}
               messagesArray={messagesArray}
               setMessagesArray={setMessagesArray}
             />
