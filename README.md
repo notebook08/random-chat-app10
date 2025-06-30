@@ -1,4 +1,4 @@
-# RhinoMeet
+# AjnabiCam - Random Video Chat
 
 RhinoMeet is a WebRTC-based video chat application inspired by Omegle. It allows users to connect and communicate in real-time via audio, video, and text chat. The application leverages WebSockets for signaling and WebRTC for media transmission between peers. Users can join random video chats with other connected users, enjoy features like screen sharing, skipping users, and real-time text messaging.
 
