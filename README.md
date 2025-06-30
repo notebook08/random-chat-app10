@@ -1,6 +1,6 @@
 # AjnabiCam - Random Video Chat
 
-RhinoMeet is a WebRTC-based video chat application inspired by Omegle. It allows users to connect and communicate in real-time via audio, video, and text chat. The application leverages WebSockets for signaling and WebRTC for media transmission between peers. Users can join random video chats with other connected users, enjoy features like screen sharing, skipping users, and real-time text messaging.
+AjnabiCam - Random Video Chat is a WebRTC-based video chat application inspired by Omegle. It allows users to connect and communicate in real-time via audio, video, and text chat. The application leverages WebSockets for signaling and WebRTC for media transmission between peers. Users can join random video chats with other connected users, enjoy features like screen sharing, skipping users, and real-time text messaging.
 
 ## Features
 
@@ -19,13 +19,13 @@ To install and run this project locally, follow these steps:
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/Shobhit2205/RhinoMeet.git
+    git clone https://github.com/Shobhit2205/AjnabiCam.git
     ```
 
 2. Navigate to the folder:
 
     ```bash
-    cd RhinoMeet
+    cd AjnabiCam
     ```
 
 ### Backend Setup
@@ -125,5 +125,5 @@ To install and run this project locally, follow these steps:
 ![Screenshot 5](screenshots/screenshot5.png)
 
 <!--
-Keywords: omegle, omegle clone github, videochat application github, random chat, github, mern stack project github, mern project, typescript, nodejs, socket-io, socketio, webrtc, websocket, real time communication, learn webrtc, open source project, Random Video chat, Random call, Video call, omegel clone, omegle type apps, Rhinomeet, rhinomeet.com, meet, random chat, messages, video chat, screen sharing, real-time messaging, secure video calls
+Keywords: omegle, omegle clone github, videochat application github, random chat, github, mern stack project github, mern project, typescript, nodejs, socket-io, socketio, webrtc, websocket, real time communication, learn webrtc, open source project, Random Video chat, Random call, Video call, omegel clone, omegle type apps, AjnabiCam, ajnabicam.com, meet, random chat, messages, video chat, screen sharing, real-time messaging, secure video calls
 -->
