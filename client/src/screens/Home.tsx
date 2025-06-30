@@ -39,52 +39,85 @@ export default function Home() {
       <main className="flex flex-col justify-center h-full mx-auto w-full p-4 lg:p-8">
         <div className="w-full flex flex-col lg:flex-row justify-center items-center lg:justify-evenly mx-auto">
           {/* Logo Section */}
-          <div className="flex flex-col items-center justify-center text-center mb-6 lg:mb-0 w-full lg:w-auto">
-            <div className="flex items-end gap-4 mb-6">
-              <svg
-                version="1.0"
-                xmlns="http://www.w3.org/2000/svg"
-                width="1508.204676pt"
-                height="836.077412pt"
-                viewBox="0 0 1508.204676 836.077412"
-                preserveAspectRatio="xMidYMid meet"
-                className="h-auto w-[150px] sm:w-[180px] md:w-[200px] text-black dark:text-white"
-              >
-                <LogoContent />
-              </svg>
+          <div className="flex flex-col items-center justify-center text-center mb-8 lg:mb-0 w-full lg:w-auto">
+            <div className="flex items-center justify-center mb-8 transform hover:scale-110 transition-transform duration-300">
+              <div className="relative">
+                <svg
+                  version="1.0"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="150"
+                  height="120"
+                  viewBox="0 0 150 120"
+                  preserveAspectRatio="xMidYMid meet"
+                  className="h-auto w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] text-teal-600 dark:text-teal-400 drop-shadow-lg"
+                >
+                  <LogoContent />
+                </svg>
+                {/* Animated pulse effect */}
+                <div className="absolute inset-0 bg-teal-400 opacity-20 rounded-full animate-pulse"></div>
+              </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-serif mb-2 ">
-              AjnabiCam
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl mb-4 sm:mb-6 ">
-              Connect. Chat. Collaborate.
-            </p>
+            <div className="space-y-2">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent mb-3 animate-fade-in">
+                AjnabiCam
+              </h1>
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-medium">
+                Connect. Chat. Collaborate.
+              </p>
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              </div>
+            </div>
           </div>
 
           {/* Description & Call-to-Action Section */}
-          <div className="bg-gradient-to-r from-teal-500 to-blue-600 shadow-xl rounded-3xl p-6 md:p-8 w-full lg:w-[60%] mx-0 backdrop-blur-lg bg-opacity-60 border border-teal-300">
-            <p className="text-sm sm:text-base md:text-lg mb-6 md:mb-8 leading-relaxed text-gray-200">
-              AjnabiCam - Random Video Chat is an innovative video chat application designed to connect
-              users from all around the world for spontaneous and engaging
-              conversations. Built with a focus on ease of use and seamless
-              interaction, AjnabiCam allows users to effortlessly start video
-              calls, share screens, and exchange messages in real-time. Whether
-              you're seeking to meet new people, collaborate on projects, or simply
-              enjoy face-to-face interactions, AjnabiCam delivers a smooth experience
-              with user-friendly features. It prioritizes privacy, utilizing encrypted
-              connections to ensure that all communications are secure. The platform's
-              sleek and modern design, combined with features like quick user pairing,
-              screen sharing, and integrated messaging, makes AjnabiCam a go-to choice
-              for both casual and professional video chatting.
-            </p>
+          <div className="bg-gradient-to-br from-white/90 to-gray-50/90 dark:from-gray-800/90 dark:to-gray-900/90 shadow-2xl rounded-3xl p-6 md:p-8 w-full lg:w-[60%] mx-0 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50">
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-4">
+                  Welcome to the Future of Video Chat
+                </h2>
+                <div className="w-20 h-1 bg-gradient-to-r from-teal-500 to-blue-500 mx-auto rounded-full"></div>
+              </div>
+              
+              <p className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 dark:text-gray-300 text-center">
+                AjnabiCam - Random Video Chat connects you with people worldwide for spontaneous conversations. 
+                Experience seamless video calls, screen sharing, and real-time messaging with 
+                enterprise-grade security and a beautiful, intuitive interface.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
+                <div className="text-center p-4 rounded-xl bg-teal-50 dark:bg-teal-900/20">
+                  <div className="text-2xl mb-2">🎥</div>
+                  <h3 className="font-semibold text-gray-800 dark:text-white">HD Video</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Crystal clear calls</p>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                  <div className="text-2xl mb-2">🔒</div>
+                  <h3 className="font-semibold text-gray-800 dark:text-white">Secure</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">End-to-end encrypted</p>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20">
+                  <div className="text-2xl mb-2">⚡</div>
+                  <h3 className="font-semibold text-gray-800 dark:text-white">Instant</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Connect in seconds</p>
+                </div>
+              </div>
+            </div>
 
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6 md:mb-8">
               <Button
-                className="w-full sm:w-auto py-3 sm:py-4 text-base sm:text-lg font-semibold tracking-wider shadow-lg transition-transform duration-300 hover:scale-105 bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 rounded-xl"
+                className="w-full sm:w-auto py-4 px-8 text-lg font-bold tracking-wide shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-3xl bg-gradient-to-r from-teal-500 via-teal-600 to-blue-600 hover:from-teal-600 hover:via-blue-600 hover:to-purple-600 rounded-2xl text-white border-0 relative overflow-hidden group"
                 onClick={handleStartCall}
               >
-                Start Your Journey
+                <span className="relative z-10 flex items-center gap-2">
+                  <span>🚀</span>
+                  Start Your Journey
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Button>
               {/* <a
                 href="https://github.com/Shobhit2205/RhinoMeet"
@@ -102,9 +135,8 @@ export default function Home() {
               </a> */}
             </div>
 
-            <div className="text-xs sm:text-sm text-center mt-4 text-teal-100">
-              By using AjnabiCam - Random Video Chat, you agree to our Terms of Service and Privacy
-              Policy.
+            <div className="text-xs sm:text-sm text-center mt-6 text-gray-500 dark:text-gray-400">
+              By using AjnabiCam - Random Video Chat, you agree to our Terms of Service and Privacy Policy.
             </div>
           </div>
         </div>
