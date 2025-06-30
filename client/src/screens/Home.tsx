@@ -120,7 +120,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Button>
               {/* <a
-                href="https://github.com/Shobhit2205/RhinoMeet"
+                href="https://github.com/Shobhit2205/AjnabiCam"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto"
