@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rhinomeet.com/sitemap.xml
+Sitemap: https://ajnabicam.com/sitemap.xml

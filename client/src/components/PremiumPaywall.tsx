@@ -1,3 +1,6 @@
+// Razorpay integration for premium purchase
+const RAZORPAY_KEY_ID = "rzp_live_h3TuNA7JPL56Dh";
+
 
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -11,7 +14,34 @@ interface PremiumPaywallProps {
 }
 
 export default function PremiumPaywall({ isOpen, onClose, onPurchase }: PremiumPaywallProps) {
+
   const [selectedPlan, setSelectedPlan] = useState<string>("weekly");
+
+  // Razorpay handler
+  const handleRazorpay = () => {
+    const plan = plans.find(p => p.id === selectedPlan);
+    if (!plan) return;
+    const amount = plan.id === "weekly" ? 9900 : 29900; // in paise (₹99/₹299)
+    const options = {
+      key: RAZORPAY_KEY_ID,
+      amount,
+      currency: "INR",
+      name: "AjnabiCam Premium",
+      description: plan.name,
+      image: "/logo.png",
+      handler: function (response: any) {
+        // On successful payment
+        onPurchase(selectedPlan);
+      },
+      prefill: {},
+      theme: { color: "#a21caf" },
+      method: 'upi', // Preselect UPI as payment method
+    };
+    // @ts-ignore
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+
 
   if (!isOpen) return null;
 
@@ -112,14 +142,15 @@ export default function PremiumPaywall({ isOpen, onClose, onPurchase }: PremiumP
 
           {/* Purchase Button */}
           <Button
-            onClick={() => onPurchase(selectedPlan)}
+            onClick={handleRazorpay}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-lg transform hover:scale-105 transition-all duration-200"
           >
             🚀 Get Premium Now - {plans.find(p => p.id === selectedPlan)?.price}
           </Button>
 
           <p className="text-xs text-center text-gray-500">
-            💳 Secure payment • 🔒 Cancel anytime • 💯 30-day money-back guarantee
+            💳 Pay easily with <span className="font-semibold text-purple-700">UPI (preselected)</span>, Cards, Wallets, or Netbanking<br />
+            🔒 Secure payment • Cancel anytime • 💯 30-day money-back guarantee
           </p>
         </CardContent>
       </Card>

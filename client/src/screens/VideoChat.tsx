@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { playSound } from "../lib/audio";
 import { useSocket } from "../context/SocketProvider";
 import { usePremium } from "../context/PremiumProvider";
 import peerservice from "../service/peer";
@@ -7,6 +8,8 @@ import { Button } from "../components/ui/button";
 import Messages from "../components/Messages";
 import ChatTimer from "../components/ChatTimer";
 import PremiumPaywall from "../components/PremiumPaywall";
+import ReportUserModal from "../components/ReportUserModal";
+import BlockUserModal from "../components/BlockUserModal";
 import { ScreenShare, StepBack, StepForward, Crown } from "lucide-react";
 import { ClipLoader } from "react-spinners"; // Import the spinner
 import { useTheme } from "../components/theme-provider";
@@ -46,6 +49,16 @@ export default function VideoChat() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [isVoiceOnly, setIsVoiceOnly] = useState(false);
   const [partnerPremium, setPartnerPremium] = useState(false);
+
+  // Reporting state
+  const [showReport, setShowReport] = useState(false);
+  const [showReportEnd, setShowReportEnd] = useState(false);
+  const [reportSubmitted, setReportSubmitted] = useState(false);
+  const [suspended, setSuspended] = useState(false);
+
+  // Blocking state
+  const [showBlock, setShowBlock] = useState(false);
+  const [blockSubmitted, setBlockSubmitted] = useState(false);
 
   const theme = useTheme();
   const navigate = useNavigate();
@@ -263,10 +276,10 @@ export default function VideoChat() {
     async (remoteId: string) => {
       setRemoteChatToken(remoteId);
       setPartnerPremium(false); // Reset partner premium status for new connection
+      playSound('match'); // Play match found sound
+      setShowReport(true); // Show report option on match
       const offer = await peerservice.getOffer();
-
       socket?.emit("offer", { offer, to: remoteId });
-      // console.log("user joined");
     },
     [socket]
   );
@@ -607,23 +620,87 @@ export default function VideoChat() {
     window.location.reload();
   }, [myStream, navigate, screenStream, socket]);
 
+  // Reporting logic
+  const handleReport = (reason: string) => {
+    // Save report count in localStorage (for demo, use socket/userId in real app)
+    const count = Number(localStorage.getItem(`ajnabicam_reports_${remoteChatToken}`) || 0) + 1;
+    localStorage.setItem(`ajnabicam_reports_${remoteChatToken}`, String(count));
+    setReportSubmitted(true);
+    setShowReport(false);
+    setShowReportEnd(false);
+    // If 20 or more reports, suspend for 24h
+    if (count >= 20) {
+      localStorage.setItem("ajnabicam_suspend_until", String(Date.now() + 24*60*60*1000));
+      setSuspended(true);
+    }
+    // Show warning if reported (not suspended)
+    if (count < 20) {
+      alert("You have been reported. Please follow decency guidelines or your account may be suspended.");
+    }
+    setTimeout(() => setReportSubmitted(false), 2000);
+  };
+
+  // Blocking logic
+  const handleBlock = () => {
+    if (remoteChatToken) {
+      let blocked = JSON.parse(localStorage.getItem("ajnabicam_blocked") || "[]");
+      if (!blocked.includes(remoteChatToken)) {
+        blocked.push(remoteChatToken);
+        localStorage.setItem("ajnabicam_blocked", JSON.stringify(blocked));
+      }
+      setBlockSubmitted(true);
+      setShowBlock(false);
+      setTimeout(() => setBlockSubmitted(false), 2000);
+    }
+  };
+
+  // Prevent matching with blocked users (pseudo, backend should enforce)
+  useEffect(() => {
+    const blocked = JSON.parse(localStorage.getItem("ajnabicam_blocked") || "[]");
+    if (blocked.includes(remoteChatToken)) {
+      alert("You have blocked this user. You will not be matched with them again.");
+      handleSkip();
+    }
+  }, [remoteChatToken, handleSkip]);
+
+  // Check for suspension (localStorage, simple demo)
+  useEffect(() => {
+    const suspendUntil = localStorage.getItem("ajnabicam_suspend_until");
+    if (suspendUntil && Date.now() < Number(suspendUntil)) {
+      setSuspended(true);
+    }
+  }, []);
+
+  // Show suspension message if needed
+  if (suspended) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className="bg-rose-100 border border-rose-300 rounded-2xl p-8 shadow-xl flex flex-col items-center">
+          <h2 className="text-2xl font-bold text-rose-600 mb-4">Account Suspended</h2>
+          <p className="text-rose-500 text-center mb-4">Your account has been suspended for 24 hours due to excessive amounts of reports.</p>
+          <p className="text-xs text-rose-400">Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Native app-like layout
   return (
-    <div className="flex flex-col lg:flex-row w-screen bg-gradient-to-b from-gray-200 to-gray-400 dark:from-gray-800 dark:to-gray-900 transition-colors duration-300">
-      {/* Timer - Show at top on mobile, side on desktop */}
-      <div className="lg:hidden w-full p-4">
-        <ChatTimer
-          isPremium={isPremium}
-          isConnected={remoteChatToken !== null}
-          partnerPremium={partnerPremium}
-          onTimeUp={handleTimeUp}
-          onUpgrade={handleUpgrade}
-        />
+    <div className="relative min-h-screen w-full bg-gradient-to-br from-rose-100 via-pink-100 to-fuchsia-200 flex flex-col items-center justify-between overflow-y-auto">
+      {/* Top Bar */}
+      <div className="w-full flex items-center justify-between px-4 pt-4 pb-2 z-20">
+        <Button variant="ghost" className="rounded-full p-2 bg-white/70 shadow-md" onClick={handleCleanup}>
+          <StepBack size={22} className="text-rose-400" />
+        </Button>
+        <div className="flex-1 flex justify-center">
+          <span className="font-bold text-lg text-rose-500 tracking-wide">AjnabiCam</span>
+        </div>
+        <div className="w-10" /> {/* Spacer for symmetry */}
       </div>
 
-      {/* Left Side */}
-      <div className="lg:w-[450px] w-full lg:h-[calc(100vh-64px)] h-auto border-b lg:border-b-0 lg:border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden">
-        {/* Desktop Timer */}
-        <div className="hidden lg:block p-4 border-b border-gray-200 dark:border-gray-700">
+      {/* Timer chip */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30">
+        <div className="bg-white/80 px-4 py-1 rounded-full shadow text-rose-500 font-semibold text-sm border border-rose-200">
           <ChatTimer
             isPremium={isPremium}
             isConnected={remoteChatToken !== null}
@@ -632,140 +709,150 @@ export default function VideoChat() {
             onUpgrade={handleUpgrade}
           />
         </div>
-        {/* My Stream */}
-        {myStream ? (
-          <div className="relative w-full h-64 lg:h-1/2">
-            {isVoiceOnly ? (
-              <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg shadow-md">
-                <div className="text-6xl mb-4">🎙️</div>
-                <p className="text-white text-lg font-semibold">Voice Only Mode</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Crown className="h-4 w-4 text-yellow-400" />
-                  <span className="text-yellow-400 text-sm font-medium">Premium</span>
-                </div>
-              </div>
-            ) : (
-              <ReactPlayer
-                className="absolute inset-0 rounded-lg"
-                url={myStream}
-                playing
-                muted
-                width="100%"
-                height="100%"
-              />
-            )}
-            <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black via-transparent to-transparent p-3 text-white text-sm rounded-tl-lg">
-              {isVoiceOnly ? "Your Voice" : "My Stream"}
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center w-full h-64 lg:h-1/2 bg-gray-400 dark:bg-gray-700 rounded-lg shadow-md">
-            <ClipLoader color={loaderColor} size={50} />
-            <p className="text-gray-600 dark:text-gray-300 mt-2">
-              Loading your stream...
-            </p>
-          </div>
-        )}
+      </div>
 
-        {/* Remote Stream */}
-        {remoteStream ? (
-          <div className="relative w-full h-64 lg:h-1/2">
-            {isVoiceOnly ? (
-              <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-blue-500 to-teal-500 rounded-lg shadow-md">
-                <div className="text-6xl mb-4">🎧</div>
-                <p className="text-white text-lg font-semibold">Listening...</p>
-                <p className="text-blue-100 text-sm mt-1">Voice Only Mode</p>
+      {/* WhatsApp VC-style Streams area */}
+      <div className="flex-1 flex flex-col items-center justify-center w-full px-2 pb-32 pt-8 relative">
+        {/* Remote (partner) stream large, full area */}
+        <div className="w-full h-[60vh] max-w-lg mx-auto rounded-3xl shadow-2xl bg-black/80 overflow-hidden relative animate-fadein border border-fuchsia-100 flex items-center justify-center">
+          {remoteStream ? (
+            isVoiceOnly ? (
+              <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-blue-400 to-teal-400">
+                <div className="text-7xl mb-2 animate-pop">�</div>
+                <p className="text-white text-lg font-semibold drop-shadow">Partner's Voice</p>
               </div>
             ) : (
               <ReactPlayer
-                className="absolute inset-0 rounded-lg"
+                className="w-full h-full object-cover"
                 url={remoteStream}
                 playing
                 muted={false}
                 width="100%"
                 height="100%"
               />
-            )}
-            <div className="absolute bottom-0 left-0 bg-gradient-to-t from-black via-transparent to-transparent p-3 text-white text-sm rounded-tl-lg">
-              {isVoiceOnly ? "Partner's Voice" : "Remote Stream"}
+            )
+          ) : (
+            <div className="flex flex-col items-center justify-center w-full h-full bg-gray-300">
+              <ClipLoader color={loaderColor} size={40} />
+              <p className="text-gray-500 mt-2 text-xs">Waiting for user to connect...</p>
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center w-full h-64 lg:h-1/2 bg-gray-400 dark:bg-gray-700 rounded-lg shadow-md">
-            <ClipLoader color={loaderColor} size={50} />
-            <p className="text-gray-600 dark:text-gray-300 mt-2">
-              Waiting for user to connect...
-            </p>
+          )}
+          {/* My stream as movable PiP */}
+          {myStream && !isVoiceOnly && (
+            <div
+              id="my-pip"
+              className="absolute bottom-4 right-4 w-24 h-40 bg-black/80 rounded-xl shadow-lg border-2 border-white cursor-move z-30 flex items-center justify-center"
+              style={{ touchAction: 'none' }}
+              draggable
+              onDragStart={e => {
+                e.dataTransfer.setDragImage(new Image(), 0, 0);
+              }}
+              onTouchStart={e => {
+                e.currentTarget.style.zIndex = '50';
+              }}
+            >
+              <ReactPlayer
+                className="w-full h-full object-cover rounded-xl"
+                url={myStream}
+                playing
+                muted
+                width="100%"
+                height="100%"
+              />
+            </div>
+          )}
+        </div>
+        {/* (Removed duplicate large myStream view; only PiP remains) */}
+        {/* My voice card if voice only */}
+        {myStream && isVoiceOnly && (
+          <div className="w-full h-32 max-w-lg mx-auto rounded-3xl shadow-2xl bg-gradient-to-br from-purple-400 to-pink-400 overflow-hidden relative animate-fadein border border-rose-100 mt-4 flex flex-col items-center justify-center">
+            <div className="text-6xl mb-2 animate-pop">🎙️</div>
+            <p className="text-white text-lg font-semibold drop-shadow">Your Voice</p>
+            {isPremium && (
+              <div className="flex items-center gap-1 bg-yellow-400 px-2 py-1 rounded-full text-xs font-bold text-white mt-2">
+                <Crown className="h-3 w-3" /> PREMIUM
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Right Side */}
-      <div className="flex-1 flex flex-col w-full">
-        {/* Button Controls */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-row gap-4 h-auto sm:h-16 shadow rounded-lg bg-gray-50 dark:bg-gray-900">
-          <Button
-            className="flex-1 p-2 gap-2 bg-red-600 text-white rounded-md"
-            size={"icon"}
-            onClick={handleCleanup}
-          >
-            <StepBack size={18} />
-            <span className="hidden sm:inline">Stop</span>
+      {/* Floating Controls Bar */}
+      <div className="fixed bottom-0 left-0 w-full z-40 flex flex-col items-center pb-4">
+        <div className="w-full max-w-md mx-auto flex flex-row justify-between items-center gap-2 bg-white/90 rounded-2xl shadow-2xl px-3 py-2 border border-rose-100 animate-fadein">
+          <Button className="flex-1 mx-1 p-3 bg-rose-500 text-white rounded-xl text-lg font-bold shadow-md" onClick={handleSkip} disabled={remoteChatToken === null}>
+            <StepForward size={22} />
+            <span className="ml-2">Skip</span>
           </Button>
-          <Button
-            className={`flex-1 p-2 gap-2 bg-blue-600 text-white rounded-md ${
-              remoteChatToken === null ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            size={"icon"}
-            onClick={handleSkip}
-            disabled={remoteChatToken === null}
-          >
-            <StepForward size={18} />
-            <span className="hidden sm:inline">Skip</span>
+          <Button className={`flex-1 mx-1 p-3 rounded-xl text-lg font-bold shadow-md flex items-center justify-center ${isCameraOn ? 'bg-gray-200 text-rose-500' : 'bg-rose-500 text-white'}`} onClick={toggleCamera}>
+            {isCameraOn ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" /></svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" /><line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2" /></svg>
+            )}
           </Button>
-          <Button
-            className="flex-1 p-2 gap-2 bg-green-600 text-white rounded-md"
-            onClick={handleScreenShare}
-            size={"icon"}
-          >
-            <ScreenShare size={18} />
-            <span className="hidden sm:inline">
-              {isScreenSharing ? "Stop Sharing" : "Share Screen"}
-            </span>
+          <Button className={`flex-1 mx-1 p-3 rounded-xl text-lg font-bold shadow-md flex items-center justify-center ${isMicOn ? 'bg-gray-200 text-rose-500' : 'bg-rose-500 text-white'}`} onClick={toggleMic}>
+            {isMicOn ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18v2m0 0a6 6 0 01-6-6v-2a6 6 0 016-6 6 6 0 016 6v2a6 6 0 01-6 6zm0 0v-2" /></svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18v2m0 0a6 6 0 01-6-6v-2a6 6 0 016-6 6 6 0 016 6v2a6 6 0 01-6 6zm0 0v-2" /><line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2" /></svg>
+            )}
           </Button>
-          <Button className="flex-1 p-2 gap-2 bg-gray-600 text-white rounded-md" onClick={toggleCamera}>
-            <span>{isCameraOn ? "Turn Off Camera" : "Turn On Camera"}</span>
-          </Button>
-          <Button className="flex-1 p-2 gap-2 bg-gray-600 text-white rounded-md" onClick={toggleMic}>
-            <span>{isMicOn ? "Turn Off Mic" : "Turn On Mic"}</span>
+          <Button className="flex-1 mx-1 p-3 bg-fuchsia-500 text-white rounded-xl text-lg font-bold shadow-md" onClick={handleScreenShare}>
+            <ScreenShare size={22} />
           </Button>
         </div>
-
-        {/* Messages Area */}
-        <div className="flex-1 max-h-[calc(100vh-128px)] overflow-auto p-4 bg-white dark:bg-gray-800 rounded-lg shadow-inner">
-          {screenStream ? (
-            <ReactPlayer
-              className="w-full h-full rounded-lg"
-              url={screenStream}
-              playing
-              width="100%"
-              height="100%"
-            />
-          ) : (
-            <Messages
-              remoteSocketId={remoteChatToken}
-              messagesArray={messagesArray}
-              setMessagesArray={setMessagesArray}
-            />
-          )}
+        <div className="w-full max-w-md mx-auto flex flex-row gap-2 mt-2">
+          <Button className="flex-1 bg-gray-100 text-gray-700 font-semibold rounded-xl" onClick={() => setShowBlock(true)}>
+            Block
+          </Button>
+          <Button className="flex-1 bg-rose-100 text-rose-700 font-semibold rounded-xl" onClick={() => setShowReport(true)}>
+            Report
+          </Button>
         </div>
+        {/* Premium-only Start Chat button */}
+        {isPremium && (
+          <div className="w-full max-w-md mx-auto mt-2">
+            <Button className="w-full py-3 text-base font-bold rounded-xl bg-green-500 text-white shadow-md">
+              Start Chat
+            </Button>
+          </div>
+        )}
       </div>
-      
+
+      {/* (Removed type message box for all users) */}
+
+      {/* Modals and Toasts */}
       <PremiumPaywall
         isOpen={showPaywall}
         onClose={() => setShowPaywall(false)}
         onPurchase={handlePremiumPurchase}
       />
+      <ReportUserModal
+        isOpen={showReport}
+        onClose={() => setShowReport(false)}
+        onSubmit={handleReport}
+      />
+      <ReportUserModal
+        isOpen={showReportEnd}
+        onClose={() => setShowReportEnd(false)}
+        onSubmit={handleReport}
+      />
+      <BlockUserModal
+        isOpen={showBlock}
+        onClose={() => setShowBlock(false)}
+        onBlock={handleBlock}
+      />
+      {reportSubmitted && (
+        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 bg-green-100 text-green-700 px-4 py-2 rounded-full shadow-lg z-50">
+          Thank you for your report.
+        </div>
+      )}
+      {blockSubmitted && (
+        <div className="fixed bottom-40 left-1/2 -translate-x-1/2 bg-rose-100 text-rose-700 px-4 py-2 rounded-full shadow-lg z-50">
+          User blocked. You won't be matched again.
+        </div>
+      )}
     </div>
   );
 }
