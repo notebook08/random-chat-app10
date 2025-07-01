@@ -43,7 +43,7 @@ const matchUser = (socket: any, userProfile: User) => {
                 return true;
             }
         }
-        
+
         // If one has premium gender filter, check compatibility
         // For demo purposes, we'll just match any users
         // In real implementation, you'd need to store user gender info
@@ -52,10 +52,10 @@ const matchUser = (socket: any, userProfile: User) => {
 
     if (compatibleUserIndex !== -1) {
         const waitingUser = waitingUsers[compatibleUserIndex];
-        
+
         // Remove from waiting list
         waitingUsers.splice(compatibleUserIndex, 1);
-        
+
         // Create pair
         userPairs[socket.id] = waitingUser.socketId;
         userPairs[waitingUser.socketId] = socket.id;
@@ -82,7 +82,7 @@ io.on('connection', (socket) => {
             voiceOnly: profile.voiceOnly || false,
             joinTime: Date.now()
         };
-        
+
         userProfiles[socket.id] = userProfile;
         matchUser(socket, userProfile);
     });
@@ -140,7 +140,7 @@ io.on('connection', (socket) => {
 
     socket.on("skip", () => {
         const partnerId = userPairs[socket.id];
-        
+
         if (partnerId) {
             io.to(partnerId).emit("skipped");
             delete userPairs[socket.id];
@@ -165,12 +165,12 @@ io.on('connection', (socket) => {
 
     socket.on("disconnect", () => {
         const partnerId = userPairs[socket.id];
-        
+
         if(partnerId){
             io.to(partnerId).emit("partnerDisconnected");
             delete userPairs[socket.id];
             delete userPairs[partnerId];
-            
+
             const partnerSocket = io.sockets.sockets.get(partnerId);
             if (partnerSocket) {
                 const partnerProfile = userProfiles[partnerId];
@@ -182,7 +182,7 @@ io.on('connection', (socket) => {
 
         // Remove from waiting list
         waitingUsers = waitingUsers.filter(user => user.socketId !== socket.id);
-        
+
         // Clean up user profile
         delete userProfiles[socket.id];
     })
@@ -195,6 +195,7 @@ app.get('/', (req, res) => {
 
 
 const PORT = process.env.PORT || 8000;
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
 });
