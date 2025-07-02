@@ -14,9 +14,9 @@ export default function GenderFilter({ isPremium, onGenderSelect, onUpgrade }: G
   const [selectedGender, setSelectedGender] = useState<string>("any");
 
   const genderOptions = [
-    { id: "any", label: "Anyone", icon: Users, description: "Connect with all genders" },
-    { id: "male", label: "Male", icon: User, description: "Connect with males only" },
-    { id: "female", label: "Female", icon: User, description: "Connect with females only" }
+    { id: "any", label: "Anyone", icon: Users, description: "Connect with all genders", emoji: "👥" },
+    { id: "male", label: "Male", icon: User, description: "Connect with males only", emoji: "👨" },
+    { id: "female", label: "Female", icon: User, description: "Connect with females only", emoji: "👩" }
   ];
 
   const handleGenderChange = (gender: string) => {
@@ -29,37 +29,38 @@ export default function GenderFilter({ isPremium, onGenderSelect, onUpgrade }: G
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto mb-4">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
+    <Card className="w-full bg-white/90 backdrop-blur-sm shadow-lg border-rose-200">
+      <CardHeader className="pb-3 bg-gradient-to-r from-rose-50 to-pink-50 rounded-t-lg">
+        <CardTitle className="text-lg flex items-center gap-2 text-rose-700">
           <Users className="h-5 w-5" />
           Gender Preference
           {!isPremium && <Crown className="h-4 w-4 text-yellow-500" />}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 gap-2">
+      <CardContent className="p-4">
+        <div className="grid grid-cols-1 gap-3">
           {genderOptions.map((option) => {
-            const Icon = option.icon;
             const isLocked = !isPremium && option.id !== "any";
             
             return (
               <Button
                 key={option.id}
                 variant={selectedGender === option.id ? "default" : "outline"}
-                className={`justify-start h-auto p-3 ${
-                  isLocked ? "opacity-50 relative" : ""
-                }`}
+                className={`justify-start h-auto p-4 rounded-xl transition-all duration-200 ${
+                  selectedGender === option.id 
+                    ? "bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-md transform scale-105" 
+                    : "hover:bg-rose-50 border-rose-200"
+                } ${isLocked ? "opacity-60" : ""}`}
                 onClick={() => handleGenderChange(option.id)}
               >
                 <div className="flex items-center gap-3 w-full">
-                  <Icon className="h-5 w-5" />
-                  <div className="text-left">
-                    <div className="font-medium">{option.label}</div>
-                    <div className="text-xs text-gray-500">{option.description}</div>
+                  <span className="text-2xl">{option.emoji}</span>
+                  <div className="text-left flex-1">
+                    <div className="font-semibold">{option.label}</div>
+                    <div className="text-xs opacity-75">{option.description}</div>
                   </div>
                   {isLocked && (
-                    <Crown className="h-4 w-4 text-yellow-500 ml-auto" />
+                    <Crown className="h-4 w-4 text-yellow-500" />
                   )}
                 </div>
               </Button>
@@ -68,17 +69,17 @@ export default function GenderFilter({ isPremium, onGenderSelect, onUpgrade }: G
         </div>
         
         {!isPremium && (
-          <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-              🎯 Want to filter by gender? Upgrade to Premium!
+          <div className="mt-4 p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl text-center border border-purple-200">
+            <p className="text-sm text-purple-700 mb-3 font-medium">
+              🎯 Unlock gender filtering with Premium!
             </p>
             <Button
               size="sm"
               onClick={onUpgrade}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full px-6 shadow-md transform hover:scale-105 transition-all duration-200"
             >
-              <Crown className="h-4 w-4 mr-1" />
-              Get Premium
+              <Crown className="h-4 w-4 mr-2" />
+              Upgrade Now
             </Button>
           </div>
         )}
