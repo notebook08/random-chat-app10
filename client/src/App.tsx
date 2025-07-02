@@ -2,7 +2,6 @@ import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-import Home from "./screens/Home";
 import VideoChat from "./screens/VideoChat";
 import SplashScreen from "./components/SplashScreen";
 import ReferToUnlock from "./screens/ReferToUnlock";
@@ -13,6 +12,10 @@ import VoicePage from "./screens/VoicePage";
 import HomePage from "./screens/HomePage";
 
 import { useNavigate } from "react-router-dom";
+import PersonalChat from "./screens/PersonalChat";
+
+<Route path="/chat/:userId" element={<PersonalChat />} />
+
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -54,3 +57,4 @@ function App() {
 }
 
 export default App;
+
