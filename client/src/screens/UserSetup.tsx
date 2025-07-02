@@ -47,6 +47,101 @@ const UserSetup: React.FC = () => {
   const isFormValid = name.trim() && gender;
 
   return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 flex items-center justify-center p-4">
+      <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Complete Your Profile</h1>
+          <p className="text-gray-600">Tell us about yourself to get started</p>
+        </div>
+
+        <div className="space-y-6">
+          {/* Profile Image Upload */}
+          <div className="flex flex-col items-center">
+            <div 
+              onClick={handleImageUpload}
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform border-4 border-white shadow-lg overflow-hidden"
+            >
+              {profileImage ? (
+                <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white text-sm font-medium">Add Photo</span>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+            <p className="text-xs text-gray-500 mt-2">Tap to add your photo</p>
+          </div>
+
+          {/* Name Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Gender Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">Gender</label>
+            <div className="flex gap-3">
+              {['Male', 'Female', 'Other'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => setGender(option.toLowerCase())}
+                  className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
+                    gender === option.toLowerCase()
+                      ? 'border-purple-500 bg-purple-50 text-purple-700'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-3 pt-4">
+            <button
+              onClick={handleFreeTrial}
+              disabled={!isFormValid}
+              className={`w-full py-4 rounded-xl font-semibold transition-all ${
+                isFormValid
+                  ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg transform hover:scale-[1.02]'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Start Free Trial ✨
+            </button>
+            
+            <button
+              onClick={handleContinueFree}
+              disabled={!isFormValid}
+              className={`w-full py-4 rounded-xl font-medium border-2 transition-all ${
+                isFormValid
+                  ? 'border-purple-500 text-purple-600 hover:bg-purple-50'
+                  : 'border-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Continue for Free
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+  return (
     <>
       <Helmet>
         <title>AjnabiCam - Setup Your Profile</title>

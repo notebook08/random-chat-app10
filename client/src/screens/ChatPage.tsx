@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useEffect } from 'react';
 import io from 'socket.io-client';
@@ -23,7 +22,7 @@ const initialChats = [
   {
     id: 3,
     name: 'Stranger #314',
-    lastMessage: 'Let's connect again soon 💕',
+    lastMessage: 'Let\'s connect again soon 💕',
     time: 'Monday',
     unreadCount: 1,
     avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
@@ -140,7 +139,7 @@ const PersonalChat = ({
           <span className="text-rose-100 text-xs">Online</span>
         </div>
       </div>
-      
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-rose-50 to-pink-50">
         {messages.map((msg, idx) => (
@@ -163,7 +162,7 @@ const PersonalChat = ({
           </div>
         ))}
       </div>
-      
+
       {/* Enhanced Input */}
       <div className="p-4 bg-white flex items-center border-t border-rose-100 shadow-lg">
         <input
@@ -238,7 +237,7 @@ const ChatPageContent = ({
           )}
         </div>
       </div>
-      
+
       {/* Search */}
       <div className="px-4 pt-4 pb-2 bg-gradient-to-b from-rose-50 to-white">
         <input
@@ -249,7 +248,7 @@ const ChatPageContent = ({
           className="w-full px-4 py-3 rounded-full border border-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white shadow-sm"
         />
       </div>
-      
+
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
         {filteredChats.length > 0 ? (
@@ -278,7 +277,7 @@ const ChatPageContent = ({
                   </div>
                 )}
               </div>
-              
+
               <div className="ml-4 flex-1 min-w-0">
                 <div className="flex justify-between items-start mb-1">
                   <h2 className={`font-semibold text-gray-800 truncate ${chat.unreadCount > 0 ? 'text-rose-700' : ''}`}>
@@ -290,7 +289,7 @@ const ChatPageContent = ({
                   {chat.lastMessage}
                 </p>
               </div>
-              
+
               {longPressedChatId === chat.id && (
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex gap-2">
                   <button
