@@ -10,10 +10,12 @@ import GenderSelect from "./screens/GenderSelect";
 import ChatPage from "./screens/ChatPage";
 import VoicePage from "./screens/VoicePage";
 import HomePage from "./screens/HomePage";
-import ProfilePage from "./screens/ProfilePage"; // Import ProfilePage
+import ProfilePage from "./screens/ProfilePage";
+import IntroScreen from "./screens/IntroScreen";
+import UserSetup from "./screens/UserSetup";
+import PersonalChat from "./screens/PersonalChat";
 
 import { useNavigate } from "react-router-dom";
-import PersonalChat from "./screens/PersonalChat";
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -21,12 +23,15 @@ function App() {
 
   useEffect(() => {
     if (!showSplash) {
-      // Only run on first app open after splash
+      // Check if user has completed setup
+      const userData = localStorage.getItem("ajnabicam_user_data");
       const firstOpen = localStorage.getItem("ajnabicam_first_open");
+      
       if (!firstOpen) {
         localStorage.setItem("ajnabicam_first_open", "true");
-        // Go to referral code screen
-        navigate("/referral", { replace: true });
+        navigate("/intro", { replace: true });
+      } else if (!userData || !JSON.parse(userData).setupComplete) {
+        navigate("/intro", { replace: true });
       }
     }
   }, [showSplash, navigate]);
@@ -43,13 +48,15 @@ function App() {
     <div>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/intro" element={<IntroScreen />} />
+        <Route path="/user-setup" element={<UserSetup />} />
         <Route path="/referral" element={<ReferralCodeScreen />} />
         <Route path="/gender-select" element={<GenderSelect />} />
         <Route path="/chat" element={<VideoChat />} />
         <Route path="/refer" element={<ReferToUnlock />} />
         <Route path="/chat-page" element={<ChatPage />} />
         <Route path="/voice" element={<VoicePage />} />
-        <Route path="/profile" element={<ProfilePage />} /> {/* Add ProfilePage Route */}
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/chat/:userId" element={<PersonalChat />} />
       </Routes>
     </div>

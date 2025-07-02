@@ -168,3 +168,177 @@ const UserSetup: React.FC = () => {
 };
 
 export default UserSetup;
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Camera, User, Upload, Crown } from 'lucide-react';
+
+const UserSetup = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: '',
+    gender: '',
+    photo: null as File | null
+  });
+  const [preview, setPreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData(prev => ({ ...prev, photo: file }));
+      const reader = new FileReader();
+      reader.onload = () => setPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleStartFreeTrial = () => {
+    setIsSubmitting(true);
+    // Save user data to localStorage
+    localStorage.setItem('ajnabicam_user_data', JSON.stringify({
+      name: formData.name,
+      gender: formData.gender,
+      setupComplete: true,
+      isPremium: true,
+      premiumExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days trial
+    }));
+    
+    setTimeout(() => {
+      navigate('/');
+    }, 1000);
+  };
+
+  const handleContinueFree = () => {
+    setIsSubmitting(true);
+    // Save user data to localStorage
+    localStorage.setItem('ajnabicam_user_data', JSON.stringify({
+      name: formData.name,
+      gender: formData.gender,
+      setupComplete: true,
+      isPremium: false
+    }));
+    
+    setTimeout(() => {
+      navigate('/');
+    }, 1000);
+  };
+
+  const isFormValid = formData.name.trim() && formData.gender && formData.photo;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-400 via-pink-500 to-purple-600 flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-md bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Complete Your Profile</h1>
+          <p className="text-gray-600">Tell us a bit about yourself to get started</p>
+        </div>
+
+        {/* Photo Upload */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
+              id="photo-upload"
+            />
+            <label
+              htmlFor="photo-upload"
+              className="w-24 h-24 mx-auto flex flex-col items-center justify-center bg-gray-100 border-2 border-dashed border-gray-300 rounded-full cursor-pointer hover:bg-gray-50 transition-colors"
+            >
+              {preview ? (
+                <img src={preview} alt="Preview" className="w-full h-full object-cover rounded-full" />
+              ) : (
+                <>
+                  <Camera className="w-8 h-8 text-gray-400 mb-1" />
+                  <span className="text-xs text-gray-500">Upload</span>
+                </>
+              )}
+            </label>
+          </div>
+        </div>
+
+        {/* Name Input */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="Enter your name"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Gender Selection */}
+        <div className="mb-8">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleInputChange}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+          >
+            <option value="">Select your gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          <button
+            onClick={handleStartFreeTrial}
+            disabled={!isFormValid || isSubmitting}
+            className={`w-full py-4 px-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold rounded-xl shadow-lg flex items-center justify-center space-x-2 transform transition-all duration-300 ${
+              isFormValid && !isSubmitting ? 'hover:scale-105 hover:shadow-xl' : 'opacity-50 cursor-not-allowed'
+            }`}
+          >
+            <Crown className="w-5 h-5" />
+            <span>Start Free Trial</span>
+          </button>
+
+          <button
+            onClick={handleContinueFree}
+            disabled={!isFormValid || isSubmitting}
+            className={`w-full py-4 px-6 bg-gray-600 text-white font-semibold rounded-xl shadow-lg transform transition-all duration-300 ${
+              isFormValid && !isSubmitting ? 'hover:scale-105 hover:shadow-xl hover:bg-gray-700' : 'opacity-50 cursor-not-allowed'
+            }`}
+          >
+            {isSubmitting ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Setting up...</span>
+              </div>
+            ) : (
+              'Continue for Free'
+            )}
+          </button>
+        </div>
+
+        {/* Premium Benefits */}
+        <div className="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200">
+          <p className="text-xs text-yellow-800 text-center">
+            <Crown className="w-4 h-4 inline mr-1" />
+            Premium includes: Gender filters, Unlimited skips, HD video quality & more!
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UserSetup;

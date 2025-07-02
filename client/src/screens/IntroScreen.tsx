@@ -104,3 +104,108 @@ const IntroScreen: React.FC = () => {
 };
 
 export default IntroScreen;
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Heart, Video, Users } from 'lucide-react';
+
+const IntroScreen = () => {
+  const navigate = useNavigate();
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleStart = () => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      navigate('/user-setup');
+    }, 500);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-400 via-pink-500 to-purple-600 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background Animation */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-10 w-20 h-20 bg-white rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-16 h-16 bg-white rounded-full animate-pulse delay-300"></div>
+        <div className="absolute bottom-32 left-20 w-12 h-12 bg-white rounded-full animate-pulse delay-700"></div>
+        <div className="absolute bottom-20 right-10 w-24 h-24 bg-white rounded-full animate-pulse delay-500"></div>
+      </div>
+
+      {/* App Name */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold text-white mb-2 tracking-wide">AjnabiCam</h1>
+        <p className="text-rose-100 text-lg">Connect with strangers worldwide</p>
+      </div>
+
+      {/* Animation Area */}
+      <div className="relative mb-12 p-8 bg-white/10 backdrop-blur-sm rounded-3xl border border-white/20 shadow-2xl">
+        <div className="flex items-center justify-center space-x-8 mb-6">
+          {/* Woman Avatar */}
+          <div className="relative">
+            <div className="w-24 h-24 bg-gradient-to-br from-pink-300 to-rose-400 rounded-full flex items-center justify-center border-4 border-white shadow-lg animate-bounce">
+              <span className="text-3xl">👩🏽</span>
+            </div>
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+          </div>
+
+          {/* Connection Animation */}
+          <div className="flex flex-col items-center space-y-2">
+            <Video className="w-8 h-8 text-white animate-pulse" />
+            <div className="flex space-x-1">
+              <Heart className="w-4 h-4 text-red-400 animate-bounce" />
+              <Heart className="w-4 h-4 text-red-400 animate-bounce delay-200" />
+              <Heart className="w-4 h-4 text-red-400 animate-bounce delay-400" />
+            </div>
+          </div>
+
+          {/* Man Avatar */}
+          <div className="relative">
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-300 to-indigo-400 rounded-full flex items-center justify-center border-4 border-white shadow-lg animate-bounce delay-300">
+              <span className="text-3xl">👨🏽</span>
+            </div>
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full border-2 border-white animate-pulse delay-500"></div>
+          </div>
+        </div>
+
+        {/* Features */}
+        <div className="flex justify-center space-x-6 text-white/80">
+          <div className="text-center">
+            <Users className="w-6 h-6 mx-auto mb-1" />
+            <span className="text-xs">Meet People</span>
+          </div>
+          <div className="text-center">
+            <Video className="w-6 h-6 mx-auto mb-1" />
+            <span className="text-xs">Video Chat</span>
+          </div>
+          <div className="text-center">
+            <Heart className="w-6 h-6 mx-auto mb-1" />
+            <span className="text-xs">Make Friends</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Start Button */}
+      <button
+        onClick={handleStart}
+        disabled={isAnimating}
+        className={`w-full max-w-md py-4 px-8 bg-white text-rose-600 font-bold text-lg rounded-2xl shadow-xl transform transition-all duration-300 ${
+          isAnimating ? 'scale-95 opacity-70' : 'hover:scale-105 hover:shadow-2xl'
+        } active:scale-95`}
+      >
+        {isAnimating ? (
+          <div className="flex items-center justify-center space-x-2">
+            <div className="w-5 h-5 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
+            <span>Starting...</span>
+          </div>
+        ) : (
+          'START'
+        )}
+      </button>
+
+      {/* Tagline */}
+      <p className="text-white/70 text-center mt-6 text-sm max-w-sm">
+        Experience the magic of spontaneous connections. Start your journey today!
+      </p>
+    </div>
+  );
+};
+
+export default IntroScreen;

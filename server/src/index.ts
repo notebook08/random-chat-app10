@@ -1,10 +1,10 @@
 import { Server, Socket } from "socket.io";
-import experss from 'express';
+import express from 'express';
 import http from 'http';
 import dotenv from 'dotenv';
 import cors from 'cors'; 
 
-const app = experss();
+const app = express();
 const server = http.createServer(app);
 dotenv.config();
 
@@ -196,6 +196,6 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 8000;
 
-app.listen(Number(PORT), '0.0.0.0', () => {
+server.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
 });

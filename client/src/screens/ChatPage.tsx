@@ -40,7 +40,7 @@ const initialChats = [
 
 type Chat = typeof initialChats[number];
 
-const SOCKET_URL = 'http://localhost:8000';5000';
+const SOCKET_URL = 'http://localhost:8000';
 
 function useChatSocket(setChats: React.Dispatch<React.SetStateAction<Chat[]>>) {
   useEffect(() => {
