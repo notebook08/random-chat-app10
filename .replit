@@ -38,9 +38,13 @@ task = "shell.exec"
 args = "cd client && npm install && npm run dev -- --port 5000"
 
 [[ports]]
-localPort = 8000
-externalPort = 80
+localPort = 5000
+externalPort = 5000
 
 [[ports]]
 localPort = 5173
 externalPort = 3000
+
+[[ports]]
+localPort = 8000
+externalPort = 80
