@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Crown } from "lucide-react";
 import { io } from "socket.io-client";
+import { playSound } from "../lib/audio";
+import { useSocket } from "../context/SocketProvider";
 import GenderFilter from "../components/GenderFilter";
 import PremiumPaywall from "../components/PremiumPaywall";
 import BottomNavBar from "../components/BottomNavBar";
@@ -47,7 +49,8 @@ export default function Home() {
       e.preventDefault();
       playSound('join');
       if (!socket) {
-        const newSocket = io(import.meta.env.VITE_API_SERVER_URL);
+        const serverUrl = import.meta.env.VITE_API_SERVER_URL || `https://${window.location.hostname}:8000`;
+        const newSocket = io(serverUrl);
         setSocket(newSocket);
       }
       navigate("/chat");

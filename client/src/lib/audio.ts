@@ -1,11 +1,12 @@
-// Utility to play sounds
-export function playSound(name: 'join' | 'swipe' | 'match') {
-  const fileMap = {
-    join: '/sounds/join.mp3',
-    swipe: '/sounds/swipe.mp3',
-    match: '/sounds/match.mp3',
-  };
-  const audio = new Audio(fileMap[name]);
-  audio.volume = 0.5;
-  audio.play();
-}
+
+export const playSound = (soundName: string) => {
+  try {
+    const audio = new Audio(`/sounds/${soundName}.mp3`);
+    audio.volume = 0.3; // Adjust volume as needed
+    audio.play().catch(error => {
+      console.log('Sound play failed:', error);
+    });
+  } catch (error) {
+    console.log('Sound loading failed:', error);
+  }
+};

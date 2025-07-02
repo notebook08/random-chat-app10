@@ -4,7 +4,7 @@ const initialChats = [
   {
     id: 1,
     name: 'Aman Kumar',
-    lastMessage: 'What's up? How are you doing today?',
+    lastMessage: 'What\'s up? How are you doing today?',
     time: '10:24 AM',
     unreadCount: 3,
     avatar: 'https://randomuser.me/api/portraits/men/75.jpg',

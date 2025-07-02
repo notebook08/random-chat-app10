@@ -1,6 +1,6 @@
-
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState, useEffect } from "react";
 import { Socket } from 'socket.io-client';
+import io from 'socket.io-client'; // Import io
 
 interface ISocketContext {
     socket: Socket | null;
@@ -20,6 +20,21 @@ export const useSocket = () => {
 
 export const SocketProvider = ({children} : {children: ReactNode}) => {
     const [socket, setSocket] = useState<Socket | null>(null);
+
+    useEffect(() => {
+        // Only initialize socket when needed
+        if (!socket) {
+            const socketUrl = import.meta.env.VITE_API_SERVER_URL || `https://${window.location.hostname}:8000`;
+            const newSocket = io(socketUrl, {
+                transports: ['websocket', 'polling']
+            });
+            setSocket(newSocket);
+
+            return () => {
+                newSocket.close();
+            };
+        }
+    }, [socket]);
 
     return (
         <SocketContext.Provider value={{socket, setSocket}}>

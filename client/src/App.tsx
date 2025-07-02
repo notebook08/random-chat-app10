@@ -47,7 +47,8 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<IntroScreen />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/intro" element={<IntroScreen />} />
         <Route path="/user-setup" element={<UserSetup />} />
         <Route path="/premium-trial" element={<ReferToUnlock />} />
         <Route path="/home" element={<HomePage />} />
