@@ -1,6 +1,4 @@
-import { useState } from 'react';
-import { useEffect } from 'react';
-import io from 'socket.io-client';
+import { useState, useEffect } from 'react';
 
 const initialChats = [
   {
@@ -39,33 +37,9 @@ const initialChats = [
 
 type Chat = typeof initialChats[number];
 
-const SOCKET_URL = `https://${window.location.hostname}:8000`;8000';
-
-function useChatSocket(setChats: React.Dispatch<React.SetStateAction<Chat[]>>) {
-  useEffect(() => {
-    const socket = io(SOCKET_URL);
-
-    socket.on('chats', (serverChats: Chat[]) => {
-      setChats(serverChats);
-    });
-
-    socket.on('chat:update', (updatedChat: Chat) => {
-      setChats(prev =>
-        prev.map(chat => (chat.id === updatedChat.id ? updatedChat : chat))
-      );
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [setChats]);
-}
-
 const ChatPageWrapper = () => {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [chats, setChats] = useState<Chat[]>(initialChats);
-
-  useChatSocket(setChats);
 
   if (selectedChat) {
     return (
@@ -121,10 +95,6 @@ const PersonalChat = ({
       setChats(prev =>
         prev.map(c => (c.id === chat.id ? updatedChat : c))
       );
-
-      const socket = io(SOCKET_URL);
-      socket.emit('chat:update', updatedChat);
-      socket.disconnect();
     }
   };
 
@@ -198,8 +168,6 @@ const ChatPageContent = ({
   const [longPressedChatId, setLongPressedChatId] = useState<number | null>(null);
   let longPressTimer: NodeJS.Timeout;
 
-  useChatSocket(setChats);
-
   const handleMouseDown = (chatId: number) => {
     longPressTimer = setTimeout(() => {
       setLongPressedChatId(chatId);
@@ -213,9 +181,6 @@ const ChatPageContent = ({
   const handleDelete = (chatId: number) => {
     setLongPressedChatId(null);
     setChats(prev => prev.filter(chat => chat.id !== chatId));
-    const socket = io(SOCKET_URL);
-    socket.emit('chat:delete', chatId);
-    socket.disconnect();
   };
 
   const filteredChats = chats.filter(chat =>

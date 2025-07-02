@@ -1,9 +1,7 @@
-
 import { useCallback, useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { playSound } from "../lib/audio";
 import { useSocket } from "../context/SocketProvider";
-import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Crown } from "lucide-react";
@@ -102,7 +100,7 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            
+
             {/* Carousel Dots */}
             <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
               {bannerImages.map((_, index) => (
