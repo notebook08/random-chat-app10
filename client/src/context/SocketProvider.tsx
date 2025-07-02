@@ -1,5 +1,6 @@
-import { createContext, ReactNode, useContext, useState } from "react";
-import { Socket } from 'socket.io-client'
+import { createContext, ReactNode, useContext, useState, useEffect } from "react";
+import { Socket } from 'socket.io-client';
+import io from 'socket.io-client';
 
 interface ISocketContext {
     socket: Socket | null;
@@ -18,8 +19,17 @@ export const useSocket = () => {
 }
 
 export const SocketProvider = ({children} : {children: ReactNode}) => {
-    // const socket = useMemo(() => io('http://localhost:8000'), []);
     const [socket, setSocket] = useState<Socket | null>(null);
+
+    useEffect(() => {
+        const socketUrl = `https://${window.location.hostname}:8000`;
+        const newSocket = io(socketUrl);
+        setSocket(newSocket);
+
+        return () => {
+            newSocket.close();
+        };
+    }, []);
 
     return (
         <SocketContext.Provider value={{socket, setSocket}}>
