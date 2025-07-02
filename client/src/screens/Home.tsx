@@ -73,28 +73,6 @@ export default function Home() {
         <title>AjnabiCam - Random Video Chat - Live chat with ajnabis</title>
       </Helmet>
       <main className="flex flex-col items-center justify-center min-h-screen w-full bg-white px-2 py-4 relative">
-        {/* Hamburger Menu - left of logo */}
-        <div className="fixed left-3 top-3 z-30 flex items-center sm:absolute sm:left-2 sm:top-3">
-          <div className="group relative">
-            <button className="flex items-center justify-center w-8 h-8 rounded-full bg-rose-100 hover:bg-rose-200 shadow-md">
-              <Menu className="w-5 h-5 text-rose-500" strokeWidth={2} />
-            </button>
-            <div className="hidden group-hover:flex flex-col absolute left-10 top-0 bg-white border border-rose-200 rounded-xl shadow-lg p-2 min-w-[140px]">
-              <button
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-rose-50 text-rose-600 font-semibold"
-                onClick={() => navigate('/refer')}
-              >
-                <Gift className="w-4 h-4 text-green-500" /> Refer
-              </button>
-              <button
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-yellow-50 text-yellow-700 font-semibold"
-                onClick={handleUpgrade}
-              >
-                <Crown className="w-4 h-4 text-yellow-500" /> Go Premium
-              </button>
-            </div>
-          </div>
-        </div>
         {/* Logo and Title */}
         <div className="flex flex-col items-center mb-4 w-full max-w-md rounded-2xl bg-white p-4 border border-rose-100 relative">
           <div className="flex items-center justify-center w-32 h-32 rounded-3xl bg-rose-100 mb-2 overflow-hidden shadow-xl">

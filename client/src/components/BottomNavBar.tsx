@@ -1,5 +1,5 @@
 import React from "react";
-import { Home as HomeIcon, MessageCircle, Gift, Mic } from "lucide-react";
+import { Home as HomeIcon, MessageCircle, Gift, Mic, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const iconSize = 18;
@@ -8,6 +8,7 @@ const navItems = [
   { label: "Chat", icon: <MessageCircle size={iconSize} />, path: "/chat-page" },
   { label: "Refer", icon: <Gift size={iconSize} />, path: "/referral" },
   { label: "Voice", icon: <Mic size={iconSize} />, path: "/voice" },
+  { label: "Profile", icon: <User size={iconSize} />, path: "/profile" }, // Added Profile
 ];
 
 export default function BottomNavBar() {

@@ -10,12 +10,10 @@ import GenderSelect from "./screens/GenderSelect";
 import ChatPage from "./screens/ChatPage";
 import VoicePage from "./screens/VoicePage";
 import HomePage from "./screens/HomePage";
+import ProfilePage from "./screens/ProfilePage"; // Import ProfilePage
 
 import { useNavigate } from "react-router-dom";
 import PersonalChat from "./screens/PersonalChat";
-
-<Route path="/chat/:userId" element={<PersonalChat />} />
-
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -51,10 +49,11 @@ function App() {
         <Route path="/refer" element={<ReferToUnlock />} />
         <Route path="/chat-page" element={<ChatPage />} />
         <Route path="/voice" element={<VoicePage />} />
+        <Route path="/profile" element={<ProfilePage />} /> {/* Add ProfilePage Route */}
+        <Route path="/chat/:userId" element={<PersonalChat />} />
       </Routes>
     </div>
   );
 }
 
 export default App;
-
