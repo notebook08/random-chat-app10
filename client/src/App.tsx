@@ -26,7 +26,7 @@ function App() {
       // Check if user has completed setup
       const userData = localStorage.getItem("ajnabicam_user_data");
       const firstOpen = localStorage.getItem("ajnabicam_first_open");
-      
+
       if (!firstOpen) {
         localStorage.setItem("ajnabicam_first_open", "true");
         navigate("/intro", { replace: true });
@@ -47,17 +47,18 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/intro" element={<IntroScreen />} />
+        <Route path="/" element={<IntroScreen />} />
         <Route path="/user-setup" element={<UserSetup />} />
-        <Route path="/referral" element={<ReferralCodeScreen />} />
+        <Route path="/premium-trial" element={<ReferToUnlock />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/gender-select" element={<GenderSelect />} />
-        <Route path="/chat" element={<VideoChat />} />
-        <Route path="/refer" element={<ReferToUnlock />} />
-        <Route path="/chat-page" element={<ChatPage />} />
+        <Route path="/video-chat" element={<VideoChat />} />
         <Route path="/voice" element={<VoicePage />} />
+        <Route path="/personal-chat" element={<PersonalChat />} />
+        <Route path="/chat" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/chat/:userId" element={<PersonalChat />} />
+        <Route path="/refer" element={<ReferToUnlock />} />
+        <Route path="/referral-code" element={<ReferralCodeScreen />} />
       </Routes>
     </div>
   );

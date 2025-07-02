@@ -1,158 +1,144 @@
-import React, { useState } from 'react';
+
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 
 export default function UserSetup() {
-  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [gender, setGender] = useState('');
-  const [photo, setPhoto] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
+      setPhoto(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setPhoto(e.target?.result as string);
+        setPhotoPreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleFreeTrial = () => {
-    const userData = {
-      name,
-      gender,
-      photo,
-      setupComplete: true,
-      isPremium: true,
-      trialExpiry: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
-    };
-    localStorage.setItem('ajnabicam_user_data', JSON.stringify(userData));
-    navigate('/');
+  const handleStartFreeTrial = () => {
+    if (name && gender) {
+      localStorage.setItem('userSetup', JSON.stringify({ name, gender, hasPhoto: !!photo }));
+      navigate('/premium-trial');
+    }
   };
 
   const handleContinueFree = () => {
-    const userData = {
-      name,
-      gender,
-      photo,
-      setupComplete: true,
-      isPremium: false
-    };
-    localStorage.setItem('ajnabicam_user_data', JSON.stringify(userData));
-    navigate('/');
+    if (name && gender) {
+      localStorage.setItem('userSetup', JSON.stringify({ name, gender, hasPhoto: !!photo }));
+      navigate('/');
+    }
   };
 
-  const isFormValid = name.trim() && gender;
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-600 flex flex-col items-center justify-center p-4">
-      <Helmet>
-        <title>Setup Your Profile - AjnabiCam</title>
-        <meta name="description" content="Create your profile to start connecting" />
-      </Helmet>
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 flex items-center justify-center px-4">
+      <Card className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-purple-800 mb-2">
+            AjnabiCam
+          </h1>
+          <p className="text-gray-600">Setup your profile to get started</p>
+        </div>
 
-      <Card className="w-full max-w-md bg-white/95 backdrop-blur-lg border-0 shadow-2xl">
-        <CardContent className="p-6">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">Setup Your Profile</h1>
-            <p className="text-gray-600">Tell us about yourself</p>
-          </div>
-
-          <div className="space-y-4">
-            {/* Photo Upload */}
-            <div className="text-center">
-              <div className="relative inline-block">
-                {photo ? (
-                  <img 
-                    src={photo} 
-                    alt="Profile" 
-                    className="w-24 h-24 rounded-full object-cover border-4 border-purple-200"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center border-4 border-purple-200">
-                    <span className="text-gray-400 text-sm">Photo</span>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        <div className="space-y-6">
+          {/* Photo Upload */}
+          <div className="text-center">
+            <div className="relative w-24 h-24 mx-auto mb-4">
+              {photoPreview ? (
+                <img 
+                  src={photoPreview} 
+                  alt="Profile preview" 
+                  className="w-full h-full rounded-full object-cover border-4 border-purple-200"
                 />
-              </div>
-              <p className="text-sm text-gray-500 mt-2">Tap to add photo</p>
-            </div>
-
-            {/* Name Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Name
+              ) : (
+                <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center border-4 border-purple-200">
+                  <span className="text-gray-500 text-3xl">📷</span>
+                </div>
+              )}
+              <label className="absolute bottom-0 right-0 bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-purple-700 transition-colors">
+                <span className="text-sm">+</span>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handlePhotoChange} 
+                  className="hidden"
+                />
               </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Enter your name"
-              />
             </div>
+            <p className="text-sm text-gray-500">Add your photo</p>
+          </div>
 
-            {/* Gender Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Gender
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setGender('male')}
-                  className={`p-3 border rounded-lg text-center transition-all ${
-                    gender === 'male' 
-                      ? 'border-purple-500 bg-purple-50 text-purple-700' 
-                      : 'border-gray-300 hover:border-purple-300'
-                  }`}
-                >
-                  👨 Male
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGender('female')}
-                  className={`p-3 border rounded-lg text-center transition-all ${
-                    gender === 'female' 
-                      ? 'border-purple-500 bg-purple-50 text-purple-700' 
-                      : 'border-gray-300 hover:border-purple-300'
-                  }`}
-                >
-                  👩 Female
-                </button>
-              </div>
-            </div>
+          {/* Name Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Your Name
+            </label>
+            <Input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-3 pt-4">
-              <Button
-                onClick={handleFreeTrial}
-                disabled={!isFormValid}
-                className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white py-3 rounded-lg font-semibold shadow-lg transform transition-all duration-200 hover:scale-105"
+          {/* Gender Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Gender
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setGender('male')}
+                className={`py-3 px-4 rounded-xl border-2 transition-all ${
+                  gender === 'male' 
+                    ? 'border-purple-500 bg-purple-50 text-purple-700' 
+                    : 'border-gray-300 text-gray-700 hover:border-purple-300'
+                }`}
               >
-                👑 Start Free Trial
-              </Button>
-
-              <Button
-                onClick={handleContinueFree}
-                disabled={!isFormValid}
-                variant="outline"
-                className="w-full border-2 border-purple-300 text-purple-600 hover:bg-purple-50 py-3 rounded-lg font-semibold"
+                👨 Male
+              </button>
+              <button
+                onClick={() => setGender('female')}
+                className={`py-3 px-4 rounded-xl border-2 transition-all ${
+                  gender === 'female' 
+                    ? 'border-purple-500 bg-purple-50 text-purple-700' 
+                    : 'border-gray-300 text-gray-700 hover:border-purple-300'
+                }`}
               >
-                Continue for Free
-              </Button>
+                👩 Female
+              </button>
             </div>
           </div>
-        </CardContent>
+
+          {/* Action Buttons */}
+          <div className="space-y-3 pt-4">
+            <Button
+              onClick={handleStartFreeTrial}
+              disabled={!name || !gender}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              👑 Start Free Trial
+            </Button>
+            
+            <Button
+              onClick={handleContinueFree}
+              disabled={!name || !gender}
+              variant="outline"
+              className="w-full py-3 rounded-xl border-2 border-purple-300 text-purple-700 hover:bg-purple-50 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Continue for Free
+            </Button>
+          </div>
+        </div>
       </Card>
     </div>
   );

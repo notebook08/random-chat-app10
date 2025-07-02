@@ -1,56 +1,87 @@
-import React from 'react';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { Button } from '../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 export default function IntroScreen() {
+  const [isVisible, setIsVisible] = useState(true);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Auto-advance after 3 seconds if user doesn't interact
+    const timer = setTimeout(() => {
+      handleStart();
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleStart = () => {
-    navigate('/user-setup');
+    setIsVisible(false);
+    setTimeout(() => {
+      navigate('/user-setup');
+    }, 500);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-600 flex flex-col items-center justify-center p-4">
-      <Helmet>
-        <title>Welcome to AjnabiCam - Start Your Journey</title>
-        <meta name="description" content="Connect with new people through video chat" />
-      </Helmet>
-
-      {/* App Name */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">AjnabiCam</h1>
-        <p className="text-white/80 text-lg">Connect with new people</p>
-      </div>
-
-      {/* Animation Area */}
-      <div className="relative w-80 h-80 mb-8 rounded-3xl bg-white/10 backdrop-blur-lg border border-white/20 flex items-center justify-center overflow-hidden">
-        {/* Animated Hearts */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="animate-pulse text-6xl">💝</div>
-          <div className="absolute top-4 right-4 animate-bounce text-2xl">💖</div>
-          <div className="absolute bottom-4 left-4 animate-ping text-xl">💕</div>
-        </div>
-
-        {/* Video Call Animation */}
-        <div className="relative z-10 flex items-center justify-center space-x-4">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center animate-pulse">
-            <span className="text-2xl">👩🏻</span>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-50 to-blue-100 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="flex flex-col items-center justify-center animate-fade-in px-6">
+        {/* App Name */}
+        <h1 className="text-4xl font-bold text-purple-800 mb-8 text-center">
+          AjnabiCam
+        </h1>
+        
+        {/* Animation Container */}
+        <div className="relative mb-8 w-80 h-60 bg-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-pink-200 to-purple-200">
+            {/* Animated hearts */}
+            <div className="absolute top-4 left-4 text-red-500 text-2xl animate-bounce">💖</div>
+            <div className="absolute top-8 right-6 text-pink-500 text-xl animate-pulse">💕</div>
+            <div className="absolute bottom-6 left-8 text-red-400 text-lg animate-bounce" style={{animationDelay: '0.5s'}}>❤️</div>
+            
+            {/* Video call simulation */}
+            <div className="flex h-full">
+              {/* Beautiful Indian woman */}
+              <div className="flex-1 bg-gradient-to-br from-pink-300 to-rose-300 flex items-center justify-center relative">
+                <div className="w-16 h-16 bg-pink-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-2xl">👩🏻</span>
+                </div>
+                <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                  Priya
+                </div>
+              </div>
+              
+              {/* Handsome Indian man */}
+              <div className="flex-1 bg-gradient-to-br from-blue-300 to-indigo-300 flex items-center justify-center relative">
+                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-2xl">👨🏻</span>
+                </div>
+                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                  Arjun
+                </div>
+              </div>
+            </div>
+            
+            {/* Connection indicator */}
+            <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-3 py-1 rounded-full animate-pulse">
+              Connected
+            </div>
           </div>
-          <div className="text-white text-2xl animate-bounce">📹</div>
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center animate-pulse">
-            <span className="text-2xl">👨🏻</span>
-          </div>
         </div>
+        
+        {/* Start Button */}
+        <Button 
+          onClick={handleStart}
+          className="w-64 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg shadow-lg transform hover:scale-105 transition-all duration-200"
+        >
+          START
+        </Button>
+        
+        {/* Subtitle */}
+        <p className="text-purple-700 text-lg font-medium mt-4 text-center animate-pulse">
+          Connect with amazing people instantly
+        </p>
       </div>
-
-      {/* Start Button */}
-      <Button 
-        onClick={handleStart}
-        className="bg-white text-purple-600 hover:bg-white/90 px-8 py-3 text-lg font-semibold rounded-full shadow-lg transform transition-all duration-200 hover:scale-105"
-      >
-        START
-      </Button>
     </div>
   );
 }
