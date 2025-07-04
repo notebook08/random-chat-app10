@@ -1,9 +1,8 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Card } from '../components/ui/card';
 
 export default function UserSetup() {
   const [name, setName] = useState('');
@@ -26,14 +25,28 @@ export default function UserSetup() {
 
   const handleStartFreeTrial = () => {
     if (name && gender) {
-      localStorage.setItem('userSetup', JSON.stringify({ name, gender, hasPhoto: !!photo }));
+      // Save user data with setup complete flag
+      const userData = {
+        name,
+        gender,
+        hasPhoto: !!photo,
+        setupComplete: true
+      };
+      localStorage.setItem('ajnabicam_user_data', JSON.stringify(userData));
       navigate('/premium-trial');
     }
   };
 
   const handleContinueFree = () => {
     if (name && gender) {
-      localStorage.setItem('userSetup', JSON.stringify({ name, gender, hasPhoto: !!photo }));
+      // Save user data with setup complete flag
+      const userData = {
+        name,
+        gender,
+        hasPhoto: !!photo,
+        setupComplete: true
+      };
+      localStorage.setItem('ajnabicam_user_data', JSON.stringify(userData));
       navigate('/');
     }
   };
