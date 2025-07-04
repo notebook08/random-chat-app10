@@ -1,0 +1,21 @@
+{
+  "name": "ajnabicam",
+  "version": "1.0.0",
+  "description": "AjnabiCam - Random Video Chat Application",
+  "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "dev": "npm run dev:client",
+    "dev:client": "cd client && npm install && npm run dev",
+    "dev:server": "cd server && npm install && npm run start:dev",
+    "install:client": "cd client && npm install",
+    "install:server": "cd server && npm install",
+    "install:all": "npm run install:client && npm run install:server"
+  },
+  "keywords": ["video-chat", "random-chat", "webrtc", "socket.io"],
+  "author": "AjnabiCam Team",
+  "license": "MIT",
+  "workspaces": [
+    "client",
+    "server"
+  ]
+}
