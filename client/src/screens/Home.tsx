@@ -5,7 +5,6 @@ import { useSocket } from "../context/SocketProvider";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Crown } from "lucide-react";
-import { io } from "socket.io-client";
 import GenderFilter from "../components/GenderFilter";
 import PremiumPaywall from "../components/PremiumPaywall";
 import BottomNavBar from "../components/BottomNavBar";
@@ -19,7 +18,7 @@ const bannerImages = [
 ];
 
 export default function Home() {
-  const { socket, setSocket } = useSocket();
+  const { socket } = useSocket();
   const navigate = useNavigate();
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
@@ -46,14 +45,9 @@ export default function Home() {
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       playSound('join');
-      if (!socket) {
-        const serverUrl = import.meta.env.VITE_API_SERVER_URL || `https://${window.location.hostname}:8000`;
-        const newSocket = io(serverUrl);
-        setSocket(newSocket);
-      }
       navigate("/chat");
     },
-    [setSocket, socket, navigate]
+    [navigate]
   );
 
   const handleUpgrade = () => {

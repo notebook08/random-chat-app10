@@ -9,7 +9,7 @@ const server = http.createServer(app);
 dotenv.config();
 
 app.use(cors({
-    origin: '*', // allow your frontend URLs
+    origin: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
 }));
@@ -17,7 +17,9 @@ app.use(cors({
 const io = new Server(server, {
     cors: {
         origin: '*',
-    }
+        methods: ['GET', 'POST']
+    },
+    transports: ['websocket', 'polling']
 });
 
 interface User {
@@ -98,43 +100,31 @@ io.on('connection', (socket) => {
     userProfiles[socket.id] = defaultProfile;
     matchUser(socket, defaultProfile);
 
-    // socket.on("user:connect", ({remoteId}) => {
-    //     console.log("user:connect backend");
-    //     io.to(remoteId).emit("user:connect", {remoteId: socket.id});
-    // })
-
     socket.on("offer", ({offer, to}) => {
-        // console.log(`Recieved Offer from ${socket.id} to ${to}`);
         io.to(to).emit("offer", {offer, from: socket.id});
     });
 
     socket.on("answer", ({answer, to}) => {
-        // console.log(`Recieved answer from ${socket.id} to ${to}`);
         io.to(to).emit("answer", {answer, from: socket.id});
     })
 
     socket.on("peer:nego:needed", ({offer, to}) => {
-        // console.log("nego needed")
         io.to(to).emit("peer:nego:needed", { offer, from: socket.id });
     });
 
     socket.on("peer:nego:done", ({answer, to}) => {
-        // console.log("nego done")
         io.to(to).emit("peer:nego:final", {answer, to: socket.id});
     });
 
     socket.on("ice-candidate", ({candidate, targetChatToken}) => {
-        // console.log(`Sending ICE candidate from ${socket.id} to ${targetChatToken}`);
         io.to(targetChatToken).emit("ice-candidate", {candidate, sourceChatToken: socket.id});
     });
 
     socket.on("send:message", ({message, targetChatToken}) => {
-        // console.log(`Message from ${socket.id} to ${targetChatToken}: ${message}`);
         io.to(targetChatToken).emit("message:recieved", {message, sourceChatToken: socket.id});
     });
 
     socket.on("send:premium:status", ({isPremium, targetChatToken}) => {
-        // console.log(`Premium status from ${socket.id} to ${targetChatToken}: ${isPremium}`);
         io.to(targetChatToken).emit("partner:premium:status", {isPremium, sourceChatToken: socket.id});
     });
 
@@ -189,10 +179,8 @@ io.on('connection', (socket) => {
 })
 
 app.get('/', (req, res) => {
-    // console.log(`Server is running...`);
     res.send("Server is running...")
 })
-
 
 const PORT = process.env.PORT || 8000;
 
