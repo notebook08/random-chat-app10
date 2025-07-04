@@ -25,7 +25,7 @@ export const SocketProvider = ({children} : {children: ReactNode}) => {
         // Only initialize socket when needed
         if (!socket) {
             const socketUrl = import.meta.env.VITE_API_SERVER_URL || 
-                `https://${window.location.hostname.replace('--5173--', '--80--')}`;
+                `http://${window.location.hostname.replace('--5173--', '--80--')}`;
             const newSocket = io(socketUrl, {
                 transports: ['websocket', 'polling']
             });
