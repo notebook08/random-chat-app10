@@ -11,7 +11,6 @@ import ChatPage from "./screens/ChatPage";
 import VoicePage from "./screens/VoicePage";
 import HomePage from "./screens/HomePage";
 import ProfilePage from "./screens/ProfilePage";
-import IntroScreen from "./screens/IntroScreen";
 import UserSetup from "./screens/UserSetup";
 import PersonalChat from "./screens/PersonalChat";
 
@@ -29,9 +28,9 @@ function App() {
 
       if (!firstOpen) {
         localStorage.setItem("ajnabicam_first_open", "true");
-        navigate("/intro", { replace: true });
+        navigate("/user-setup", { replace: true });
       } else if (!userData || !JSON.parse(userData).setupComplete) {
-        navigate("/intro", { replace: true });
+        navigate("/user-setup", { replace: true });
       }
     }
   }, [showSplash, navigate]);
@@ -48,7 +47,6 @@ function App() {
     <div>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/intro" element={<IntroScreen />} />
         <Route path="/user-setup" element={<UserSetup />} />
         <Route path="/premium-trial" element={<ReferToUnlock />} />
         <Route path="/home" element={<HomePage />} />
