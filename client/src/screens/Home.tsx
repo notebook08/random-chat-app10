@@ -6,8 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Crown } from "lucide-react";
 import { io } from "socket.io-client";
-import { playSound } from "../lib/audio";
-import { useSocket } from "../context/SocketProvider";
 import GenderFilter from "../components/GenderFilter";
 import PremiumPaywall from "../components/PremiumPaywall";
 import BottomNavBar from "../components/BottomNavBar";
