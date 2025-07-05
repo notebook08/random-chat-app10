@@ -648,25 +648,29 @@ export default function VideoChat() {
 
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-br from-rose-100 via-pink-100 to-fuchsia-200 flex flex-col items-center justify-between overflow-y-auto">
-      {/* Top Bar */}
-      <div className="w-full flex items-center justify-between px-4 pt-4 pb-2 z-20">
-        <Button variant="ghost" className="rounded-full p-2 bg-white/70 shadow-md" onClick={handleCleanup}>
-          <ArrowLeft size={22} className="text-rose-400" />
-        </Button>
-        <div className="flex-1 flex justify-center">
-          <span className="font-bold text-lg text-rose-500 tracking-wide">AjnabiCam</span>
+      {/* Enhanced Top Bar with increased height */}
+      <div className="w-full bg-white/95 backdrop-blur-sm shadow-lg px-4 py-4 z-20 border-b border-rose-100">
+        <div className="flex items-center justify-between max-w-md mx-auto">
+          <Button variant="ghost" className="rounded-full p-2 hover:bg-rose-50" onClick={handleCleanup}>
+            <ArrowLeft size={22} className="text-rose-500" />
+          </Button>
+          
+          <div className="flex-1 flex justify-center">
+            <span className="font-bold text-xl text-rose-600 tracking-wide">AjnabiCam</span>
+          </div>
+          
+          <Button
+            onClick={() => setShowTreasureChest(true)}
+            className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-3 py-2 rounded-full shadow-md"
+          >
+            <Coins className="h-4 w-4 mr-1" />
+            {coins}
+          </Button>
         </div>
-        <Button
-          onClick={() => setShowTreasureChest(true)}
-          className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-3 py-2 rounded-full shadow-md"
-        >
-          <Coins className="h-4 w-4 mr-1" />
-          {coins}
-        </Button>
       </div>
 
       {/* Timer */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30">
+      <div className="absolute top-24 left-1/2 -translate-x-1/2 z-30">
         <SevenMinuteTimer
           isConnected={remoteChatToken !== null}
           onTimeUp={handleTimeUp}
@@ -675,9 +679,9 @@ export default function VideoChat() {
         />
       </div>
 
-      {/* Video Streams */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full px-2 pb-32 pt-8 relative">
-        <div className="w-full h-[60vh] max-w-lg mx-auto rounded-3xl shadow-2xl bg-black/80 overflow-hidden relative border border-fuchsia-100 flex items-center justify-center">
+      {/* Video Streams - Increased height and positioned closer to top */}
+      <div className="flex-1 flex flex-col items-center justify-start w-full px-2 pb-32 pt-4 relative">
+        <div className="w-full h-[70vh] max-w-lg mx-auto rounded-3xl shadow-2xl bg-black/80 overflow-hidden relative border border-fuchsia-100 flex items-center justify-center mt-16">
           {remoteStream ? (
             isVoiceOnly ? (
               <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-blue-400 to-teal-400">

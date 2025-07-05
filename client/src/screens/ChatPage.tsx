@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { ArrowLeft, MoreVertical, Send } from 'lucide-react';
+import BottomNavBar from '../components/BottomNavBar';
 
 const initialChats = [
   {
@@ -108,7 +109,7 @@ const PersonalChat = ({
   };
 
   return (
-    <div className="max-w-md mx-auto h-screen bg-gradient-to-br from-rose-50 to-pink-100 shadow-xl overflow-hidden flex flex-col">
+    <div className="max-w-md mx-auto h-screen bg-gradient-to-br from-rose-50 to-pink-100 shadow-xl overflow-hidden flex flex-col relative pb-20">
       {/* Enhanced Header */}
       <div className="p-4 bg-gradient-to-r from-rose-500 to-pink-600 flex items-center shadow-lg">
         <button 
@@ -172,6 +173,9 @@ const PersonalChat = ({
           <Send size={16} />
         </Button>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavBar />
     </div>
   );
 };
@@ -205,7 +209,7 @@ const ChatPageContent = ({
   const totalUnreadCount = chats.reduce((sum, chat) => sum + chat.unreadCount, 0);
 
   return (
-    <div className="max-w-md mx-auto h-screen bg-white shadow-xl overflow-hidden flex flex-col">
+    <div className="max-w-md mx-auto h-screen bg-white shadow-xl overflow-hidden flex flex-col relative pb-20">
       {/* Enhanced Header */}
       <div className="p-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg">
         <div className="flex items-center justify-between">
@@ -312,6 +316,9 @@ const ChatPageContent = ({
           </div>
         )}
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavBar />
     </div>
   );
 };

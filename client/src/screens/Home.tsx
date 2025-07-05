@@ -68,21 +68,12 @@ export default function Home() {
         <title>AjnabiCam - Random Video Chat - Live chat with ajnabis</title>
       </Helmet>
       <main className="flex flex-col min-h-screen w-full bg-gradient-to-br from-rose-50 to-pink-100 relative pb-20">
-        {/* Header */}
-        <header className="w-full flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm shadow-sm">
-          <div className="flex items-center gap-2">
-            {isPremium && (
-              <Crown className="h-5 w-5 text-yellow-500" />
-            )}
-          </div>
-        </header>
-
-        <div className="flex-1 flex flex-col items-center px-4 py-6">
-          {/* Banner Carousel with App Name and Coin Button */}
-          <div className="w-full max-w-md mb-6 relative">
-            {/* App Name positioned above banner at 90 degree angle to coin button */}
-            <div className="absolute -top-12 left-4 z-10">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent mb-1">
+        {/* Enhanced Header with increased height */}
+        <header className="w-full bg-white/95 backdrop-blur-sm shadow-lg px-4 py-6 border-b border-rose-100">
+          <div className="flex items-center justify-between max-w-md mx-auto">
+            {/* App Name and Tagline */}
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent mb-1">
                 AjnabiCam
               </h1>
               <p className="text-gray-600 text-sm font-medium">
@@ -90,8 +81,15 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Coin Button positioned at the right where banner ends */}
-            <div className="absolute -top-12 right-4 z-10">
+            {/* Premium Badge and Coin Button */}
+            <div className="flex items-center gap-3">
+              {isPremium && (
+                <div className="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-500 px-3 py-1 rounded-full">
+                  <Crown className="h-4 w-4 text-white" />
+                  <span className="text-white text-xs font-bold">PREMIUM</span>
+                </div>
+              )}
+              
               <Button
                 onClick={() => setShowTreasureChest(true)}
                 className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-4 py-2 rounded-full shadow-md transform hover:scale-105 transition-all duration-200"
@@ -100,7 +98,12 @@ export default function Home() {
                 {coins}
               </Button>
             </div>
+          </div>
+        </header>
 
+        <div className="flex-1 flex flex-col items-center px-4 py-6">
+          {/* Banner Carousel */}
+          <div className="w-full max-w-md mb-6 relative">
             <div className="overflow-hidden rounded-2xl shadow-lg">
               <div
                 className="flex transition-transform duration-700 ease-in-out"

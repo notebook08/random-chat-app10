@@ -15,7 +15,7 @@ export default function BottomNavBar() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-t border-rose-100 flex justify-around items-center h-14 shadow-lg w-full max-w-md mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-rose-100 flex justify-around items-center h-16 shadow-lg w-full max-w-md mx-auto">
       {navItems.map((item) => (
         <button
           key={item.label}
