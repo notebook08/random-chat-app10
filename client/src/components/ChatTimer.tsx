@@ -12,17 +12,19 @@ interface ChatTimerProps {
 }
 
 export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTimeUp, onUpgrade }: ChatTimerProps) {
-  const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes for premium, 15 for free
   const [isActive, setIsActive] = useState(false);
   const hasPremiumAccess = isPremium || partnerPremium;
+  const maxTime = hasPremiumAccess ? 30 * 60 : 15 * 60; // 30 min for premium, 15 min for free
 
   useEffect(() => {
     if (isConnected) {
       if (!hasPremiumAccess) {
         setIsActive(true);
-        setTimeLeft(15 * 60);
+        setTimeLeft(15 * 60); // 15 minutes for free users
       } else {
-        setIsActive(false);
+        setIsActive(true);
+        setTimeLeft(30 * 60); // 30 minutes for premium users
       }
     } else {
       setIsActive(false);
@@ -32,7 +34,7 @@ export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTi
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
-    if (isActive && timeLeft > 0 && !hasPremiumAccess) {
+    if (isActive && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((time) => {
           if (time <= 1) {
@@ -48,7 +50,7 @@ export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTi
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, timeLeft, hasPremiumAccess, onTimeUp]);
+  }, [isActive, timeLeft, onTimeUp]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -57,8 +59,9 @@ export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTi
   };
 
   const getTimeColor = () => {
-    if (timeLeft > 300) return "text-green-600";
-    if (timeLeft > 60) return "text-yellow-600";
+    const percentage = timeLeft / maxTime;
+    if (percentage > 0.5) return "text-green-600";
+    if (percentage > 0.25) return "text-yellow-600";
     return "text-red-600";
   };
 
@@ -77,8 +80,10 @@ export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTi
           
           {hasPremiumAccess ? (
             <div className="flex items-center gap-2 text-purple-600">
-              <Infinity className="h-5 w-5" />
-              <span className="font-bold">Unlimited</span>
+              <div className={`font-mono text-xl font-bold ${getTimeColor()}`}>
+                {formatTime(timeLeft)}
+              </div>
+              <span className="text-sm">/ 30:00</span>
               <Crown className="h-4 w-4 text-yellow-500" />
               {partnerPremium && !isPremium && (
                 <span className="text-xs text-green-600">(Partner Premium)</span>
@@ -91,40 +96,36 @@ export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTi
           )}
         </div>
         
-        {!hasPremiumAccess && (
-          <>
-            <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all duration-1000 ${
-                  timeLeft > 300 ? 'bg-green-500' :
-                  timeLeft > 60 ? 'bg-yellow-500' : 'bg-red-500'
-                }`}
-                style={{ width: `${(timeLeft / (15 * 60)) * 100}%` }}
-              />
-            </div>
-            
-            {timeLeft < 300 && (
-              <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                  ⏰ Continue this amazing conversation! Get Premium for unlimited time with this person.
-                </p>
-                <Button
-                  size="sm"
-                  onClick={onUpgrade}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                >
-                  <Crown className="h-4 w-4 mr-1" />
-                  Upgrade Now - ₹99/week
-                </Button>
-              </div>
-            )}
-          </>
+        <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          <div
+            className={`h-2 rounded-full transition-all duration-1000 ${
+              timeLeft > maxTime * 0.5 ? 'bg-green-500' :
+              timeLeft > maxTime * 0.25 ? 'bg-yellow-500' : 'bg-red-500'
+            }`}
+            style={{ width: `${(timeLeft / maxTime) * 100}%` }}
+          />
+        </div>
+        
+        {!hasPremiumAccess && timeLeft < 300 && (
+          <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+              ⏰ Continue this amazing conversation! Get Premium for 30-minute calls.
+            </p>
+            <Button
+              size="sm"
+              onClick={onUpgrade}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            >
+              <Crown className="h-4 w-4 mr-1" />
+              Upgrade Now - ₹99/week
+            </Button>
+          </div>
         )}
         
         {hasPremiumAccess && (
           <div className="mt-2 p-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg text-center">
             <p className="text-sm text-green-600 dark:text-green-400">
-              ✨ {isPremium ? "You have" : "Your partner has"} Premium - Enjoy unlimited chat time! 💕
+              ✨ {isPremium ? "You have" : "Your partner has"} Premium - Enjoy 30-minute calls! 💕
             </p>
           </div>
         )}

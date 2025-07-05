@@ -8,14 +8,14 @@ import peerservice from "../service/peer";
 import ReactPlayer from "react-player";
 import { Button } from "../components/ui/button";
 import Messages from "../components/Messages";
-import SevenMinuteTimer from "../components/SevenMinuteTimer";
+import ChatTimer from "../components/ChatTimer";
 import PremiumPaywall from "../components/PremiumPaywall";
 import TreasureChest from "../components/TreasureChest";
 import ReportUserModal from "../components/ReportUserModal";
 import BlockUserModal from "../components/BlockUserModal";
 import StayConnectedModal from "../components/StayConnectedModal";
 import FriendNotification from "../components/FriendNotification";
-import { ScreenShare, ArrowLeft, SkipForward, Crown, Video, VideoOff, Mic, MicOff, Coins } from "lucide-react";
+import { ScreenShare, ArrowLeft, SkipForward, Crown, Video, VideoOff, Mic, MicOff, Coins, Phone } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 import { useTheme } from "../components/theme-provider";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -48,7 +48,7 @@ export default function VideoChat() {
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [flag, setFlag] = useState(false);
   const [messagesArray, setMessagesArray] = useState<
-    Array<{ sender: string; message: string }>
+    Array<{ sender: string; message: string; id?: string; isSecret?: boolean; timestamp?: number }>
   >([]);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
@@ -224,6 +224,51 @@ export default function VideoChat() {
       getUserStream();
     }
   }, [getUserStream, myStream]);
+
+  // Premium feature: Switch to voice-only mode during call
+  const toggleVoiceOnlyMode = useCallback(async () => {
+    if (!isPremium) {
+      setShowPaywall(true);
+      return;
+    }
+
+    try {
+      if (!isVoiceOnly) {
+        // Switch to voice-only
+        const videoTrack = myStream?.getVideoTracks()[0];
+        if (videoTrack) {
+          videoTrack.stop();
+          myStream?.removeTrack(videoTrack);
+          
+          const sender = peerservice.peer
+            .getSenders()
+            .find((s) => s.track?.kind === "video");
+          if (sender) {
+            await sender.replaceTrack(null);
+          }
+        }
+        setIsCameraOn(false);
+        setIsVoiceOnly(true);
+      } else {
+        // Switch back to video
+        const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const newVideoTrack = newStream.getVideoTracks()[0];
+        myStream?.addTrack(newVideoTrack);
+        
+        const sender = peerservice.peer
+          .getSenders()
+          .find((s) => s.track?.kind === "video");
+        if (sender) {
+          await sender.replaceTrack(newVideoTrack);
+        }
+        
+        setIsCameraOn(true);
+        setIsVoiceOnly(false);
+      }
+    } catch (error) {
+      console.error("Error toggling voice-only mode:", error);
+    }
+  }, [isPremium, isVoiceOnly, myStream]);
 
   const toggleCamera = useCallback(async () => {
     if (!myStream) return;
@@ -786,10 +831,10 @@ export default function VideoChat() {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-br from-rose-100 via-pink-100 to-fuchsia-200 flex flex-col items-center justify-between overflow-y-auto">
-      {/* Enhanced Top Bar with increased height */}
-      <div className="w-full bg-white/95 backdrop-blur-sm shadow-lg px-4 py-4 z-20 border-b border-rose-100">
-        <div className="flex items-center justify-between max-w-md mx-auto">
+    <div className="relative min-h-screen w-full max-w-md mx-auto bg-white flex flex-col items-center justify-between overflow-y-auto">
+      {/* Enhanced Top Bar */}
+      <div className="w-full bg-white shadow-sm px-4 py-4 z-20 border-b border-pink-100">
+        <div className="flex items-center justify-between">
           <Button variant="ghost" className="rounded-full p-2 hover:bg-rose-50" onClick={handleCleanup}>
             <ArrowLeft size={22} className="text-rose-500" />
           </Button>
@@ -815,19 +860,20 @@ export default function VideoChat() {
 
       {/* Timer - only show for non-friend calls */}
       {!isFriendCall && (
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-30">
-          <SevenMinuteTimer
+        <div className="w-full px-4 py-2">
+          <ChatTimer
+            isPremium={isPremium}
             isConnected={remoteChatToken !== null}
+            partnerPremium={partnerPremium}
             onTimeUp={handleTimeUp}
             onUpgrade={handleUpgrade}
-            onUseCoin={handleUseCoin}
           />
         </div>
       )}
 
-      {/* Video Streams - Increased height and positioned closer to top */}
-      <div className="flex-1 flex flex-col items-center justify-start w-full px-2 pb-32 pt-4 relative">
-        <div className="w-full h-[70vh] max-w-lg mx-auto rounded-3xl shadow-2xl bg-black/80 overflow-hidden relative border border-fuchsia-100 flex items-center justify-center mt-16">
+      {/* Video Streams */}
+      <div className="flex-1 flex flex-col items-center justify-start w-full px-2 pb-32 pt-2 relative">
+        <div className="w-full h-[50vh] rounded-3xl shadow-2xl bg-black/80 overflow-hidden relative border border-pink-100 flex items-center justify-center">
           {remoteStream ? (
             isVoiceOnly ? (
               <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-blue-400 to-teal-400">
@@ -860,7 +906,7 @@ export default function VideoChat() {
           
           {/* My stream as PiP */}
           {myStream && !isVoiceOnly && (
-            <div className="absolute bottom-4 right-4 w-24 h-40 bg-black/80 rounded-xl shadow-lg border-2 border-white z-30 flex items-center justify-center">
+            <div className="absolute bottom-4 right-4 w-20 h-32 bg-black/80 rounded-xl shadow-lg border-2 border-white z-30 flex items-center justify-center">
               <ReactPlayer
                 className="w-full h-full object-cover rounded-xl"
                 url={myStream}
@@ -882,21 +928,30 @@ export default function VideoChat() {
         
         {/* Voice only card */}
         {myStream && isVoiceOnly && (
-          <div className="w-full h-32 max-w-lg mx-auto rounded-3xl shadow-2xl bg-gradient-to-br from-purple-400 to-pink-400 overflow-hidden relative border border-rose-100 mt-4 flex flex-col items-center justify-center">
-            <div className="text-6xl mb-2">🎙️</div>
-            <p className="text-white text-lg font-semibold drop-shadow">Your Voice</p>
+          <div className="w-full h-24 rounded-3xl shadow-2xl bg-gradient-to-br from-purple-400 to-pink-400 overflow-hidden relative border border-rose-100 mt-4 flex flex-col items-center justify-center">
+            <div className="text-4xl mb-1">🎙️</div>
+            <p className="text-white text-sm font-semibold drop-shadow">Your Voice</p>
             {isPremium && (
-              <div className="flex items-center gap-1 bg-yellow-400 px-2 py-1 rounded-full text-xs font-bold text-white mt-2">
+              <div className="flex items-center gap-1 bg-yellow-400 px-2 py-1 rounded-full text-xs font-bold text-white mt-1">
                 <Crown className="h-3 w-3" /> PREMIUM
               </div>
             )}
           </div>
         )}
+
+        {/* Messages Section */}
+        <div className="w-full h-[30vh] mt-4 rounded-2xl shadow-lg border border-pink-100 overflow-hidden">
+          <Messages
+            remoteChatToken={remoteChatToken}
+            messagesArray={messagesArray}
+            setMessagesArray={setMessagesArray}
+          />
+        </div>
       </div>
 
       {/* Controls */}
-      <div className="fixed bottom-0 left-0 w-full z-40 flex flex-col items-center pb-4">
-        <div className="w-full max-w-md mx-auto flex flex-row justify-between items-center gap-2 bg-white/90 rounded-2xl shadow-2xl px-3 py-2 border border-rose-100">
+      <div className="fixed bottom-0 left-0 w-full z-40 flex flex-col items-center pb-4 max-w-md mx-auto">
+        <div className="w-full flex flex-row justify-between items-center gap-2 bg-white rounded-2xl shadow-2xl px-3 py-2 border border-pink-100">
           <Button 
             className="flex-1 mx-1 p-3 bg-rose-500 text-white rounded-xl text-lg font-bold shadow-md" 
             onClick={handleSkip} 
@@ -932,8 +987,25 @@ export default function VideoChat() {
           </Button>
         </div>
         
+        {/* Premium Voice-Only Toggle */}
+        {isPremium && remoteChatToken && (
+          <div className="w-full flex justify-center mt-2">
+            <Button 
+              className={`px-6 py-2 rounded-xl font-semibold shadow-md ${
+                isVoiceOnly 
+                  ? 'bg-purple-500 text-white' 
+                  : 'bg-white text-purple-500 border border-purple-300'
+              }`}
+              onClick={toggleVoiceOnlyMode}
+            >
+              <Phone className="h-4 w-4 mr-2" />
+              {isVoiceOnly ? 'Switch to Video' : 'Voice Only'}
+            </Button>
+          </div>
+        )}
+        
         {!isFriendCall && (
-          <div className="w-full max-w-md mx-auto flex flex-row gap-2 mt-2">
+          <div className="w-full flex flex-row gap-2 mt-2">
             <Button 
               className="flex-1 bg-gray-100 text-gray-700 font-semibold rounded-xl" 
               onClick={() => setShowBlock(true)}
@@ -945,14 +1017,6 @@ export default function VideoChat() {
               onClick={() => setShowReport(true)}
             >
               Report
-            </Button>
-          </div>
-        )}
-        
-        {isPremium && (
-          <div className="w-full max-w-md mx-auto mt-2">
-            <Button className="w-full py-3 text-base font-bold rounded-xl bg-green-500 text-white shadow-md">
-              Start Chat
             </Button>
           </div>
         )}

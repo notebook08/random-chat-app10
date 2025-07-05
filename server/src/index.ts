@@ -37,7 +37,15 @@ const userProfiles: Record<string, User> = {};
 const matchUser = (socket: Socket, userProfile: User) => {
     if(!socket.id) return;
 
+    // Premium users get priority - sort waiting users by premium status
+    waitingUsers.sort((a, b) => {
+        if (a.isPremium && !b.isPremium) return -1;
+        if (!a.isPremium && b.isPremium) return 1;
+        return 0;
+    });
+
     const compatibleUserIndex = waitingUsers.findIndex(waitingUser => {
+        // Basic compatibility check
         if (!userProfile.genderFilter || userProfile.genderFilter === "any") {
             if (!waitingUser.genderFilter || waitingUser.genderFilter === "any") {
                 return true;
@@ -56,10 +64,10 @@ const matchUser = (socket: Socket, userProfile: User) => {
 
         socket.emit("user:connect", waitingUser.socketId);
 
-        console.log(`Matched ${socket.id} with ${waitingUser.socketId}`);
+        console.log(`Matched ${socket.id} (Premium: ${userProfile.isPremium}) with ${waitingUser.socketId} (Premium: ${waitingUser.isPremium})`);
     } else {
         waitingUsers.push(userProfile);
-        console.log(`${socket.id} is waiting for pair`);
+        console.log(`${socket.id} (Premium: ${userProfile.isPremium}) is waiting for pair`);
     }
 }
 
@@ -109,12 +117,34 @@ io.on('connection', (socket: Socket) => {
         io.to(to).emit("ice-candidate", {candidate, sourceChatToken: socket.id});
     });
 
-    socket.on("send:message", ({message, targetChatToken}: {message: string, targetChatToken: string}) => {
-        io.to(targetChatToken).emit("message:recieved", {message, sourceChatToken: socket.id});
+    socket.on("send:message", ({message, targetChatToken, isSecret, messageId}: {
+        message: string, 
+        targetChatToken: string, 
+        isSecret?: boolean, 
+        messageId?: string
+    }) => {
+        io.to(targetChatToken).emit("message:recieved", {
+            message, 
+            sourceChatToken: socket.id, 
+            isSecret, 
+            messageId
+        });
+    });
+
+    socket.on("secret:mode:toggle", ({targetChatToken, enabled}: {targetChatToken: string, enabled: boolean}) => {
+        io.to(targetChatToken).emit("secret:mode:changed", {enabled, sourceChatToken: socket.id});
     });
 
     socket.on("send:premium:status", ({isPremium, targetChatToken}: {isPremium: boolean, targetChatToken: string}) => {
         io.to(targetChatToken).emit("partner:premium:status", {isPremium, sourceChatToken: socket.id});
+    });
+
+    socket.on("stay:connected:request", ({targetChatToken, wantToStay}: {targetChatToken: string, wantToStay: boolean}) => {
+        io.to(targetChatToken).emit("stay:connected:request", {wantToStay, from: socket.id});
+    });
+
+    socket.on("stay:connected:response", ({targetChatToken, wantToStay}: {targetChatToken: string, wantToStay: boolean}) => {
+        io.to(targetChatToken).emit("stay:connected:response", {wantToStay, from: socket.id});
     });
 
     socket.on("skip", () => {

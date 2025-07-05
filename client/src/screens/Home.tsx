@@ -39,9 +39,17 @@ export default function Home() {
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       playSound('join');
+      
+      // Send user profile to server for premium priority matching
+      socket?.emit("user:profile", {
+        isPremium,
+        genderFilter: "any", // This would come from the gender filter component
+        voiceOnly: false
+      });
+      
       navigate("/video-chat");
     },
-    [navigate]
+    [navigate, socket, isPremium]
   );
 
   const handleUpgrade = () => {
@@ -121,14 +129,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Carousel Dots - Made smaller */}
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+            {/* Carousel Dots - Made much smaller */}
+            <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1">
               {bannerImages.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentBannerIndex(index)}
-                  className={`h-1 w-1 rounded-full transition-all duration-300 ${
-                    currentBannerIndex === index ? 'bg-white w-3' : 'bg-white/50'
+                  className={`h-0.5 w-0.5 rounded-full transition-all duration-300 ${
+                    currentBannerIndex === index ? 'bg-white w-2' : 'bg-white/50'
                   }`}
                 />
               ))}
