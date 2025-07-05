@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Eye, EyeOff, Crown, X } from "lucide-react";

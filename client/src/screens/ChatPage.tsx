@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { ArrowLeft, MoreVertical, Send, Search, X } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Search, X, Clock } from 'lucide-react';
 import BottomNavBar from '../components/BottomNavBar';
 import { useFriends } from '../context/FriendsProvider';
+import { usePremium } from '../context/PremiumProvider';
 
 const initialChats = [
   {
@@ -15,6 +16,7 @@ const initialChats = [
     unreadCount: 3,
     avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
     isFriend: false,
+    lastSeen: new Date(Date.now() - 2 * 60 * 1000), // 2 minutes ago
   },
   {
     id: 2,
@@ -24,6 +26,7 @@ const initialChats = [
     unreadCount: 0,
     avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
     isFriend: false,
+    lastSeen: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
   },
   {
     id: 3,
@@ -33,6 +36,7 @@ const initialChats = [
     unreadCount: 1,
     avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
     isFriend: false,
+    lastSeen: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
   },
   {
     id: 4,
@@ -42,6 +46,7 @@ const initialChats = [
     unreadCount: 2,
     avatar: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
     isFriend: false,
+    lastSeen: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
   },
 ];
 
@@ -62,6 +67,7 @@ const ChatPageWrapper = () => {
       unreadCount: 0,
       avatar: friend.avatar,
       isFriend: true,
+      lastSeen: friend.lastSeen || new Date(),
     }));
 
     setChats([...friendChats, ...initialChats]);
@@ -221,9 +227,9 @@ const ChatPageContent = ({
   setChats: React.Dispatch<React.SetStateAction<Chat[]>>;
 }) => {
   const [search, setSearch] = useState('');
-  const [isSearchActive, setIsSearchActive] = useState(false);
   const [longPressedChatId, setLongPressedChatId] = useState<number | null>(null);
   const navigate = useNavigate();
+  const { isPremium } = usePremium();
 
   const handleLongPress = (chatId: number) => {
     setLongPressedChatId(chatId);
@@ -232,13 +238,6 @@ const ChatPageContent = ({
   const handleDelete = (chatId: number) => {
     setLongPressedChatId(null);
     setChats(prev => prev.filter(chat => chat.id !== chatId));
-  };
-
-  const handleSearchToggle = () => {
-    setIsSearchActive(!isSearchActive);
-    if (isSearchActive) {
-      setSearch('');
-    }
   };
 
   const filteredChats = chats.filter(chat =>
@@ -252,11 +251,24 @@ const ChatPageContent = ({
   const friendChats = filteredChats.filter(chat => chat.isFriend);
   const regularChats = filteredChats.filter(chat => !chat.isFriend);
 
+  const formatLastSeen = (lastSeen: Date) => {
+    const now = new Date();
+    const diffMs = now.getTime() - lastSeen.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  };
+
   return (
     <div className="max-w-md mx-auto h-screen bg-white shadow-xl overflow-hidden flex flex-col relative pb-20">
       {/* Enhanced Header */}
       <div className="p-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <button 
               onClick={() => navigate('/')} 
@@ -267,53 +279,40 @@ const ChatPageContent = ({
             </button>
             <h1 className="text-xl font-bold">Chats</h1>
           </div>
-          <div className="flex items-center gap-3">
-            {totalUnreadCount > 0 && (
-              <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                <span className="text-sm font-semibold">{totalUnreadCount} new</span>
-              </div>
-            )}
+          {totalUnreadCount > 0 && (
+            <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+              <span className="text-sm font-semibold">{totalUnreadCount} new</span>
+            </div>
+          )}
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-rose-200 h-4 w-4" />
+          <Input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search chats and messages..."
+            className="w-full pl-10 pr-10 py-3 rounded-full border-0 bg-white/20 backdrop-blur-sm text-white placeholder-rose-200 focus:outline-none focus:ring-2 focus:ring-white/30"
+          />
+          {search && (
             <button
-              onClick={handleSearchToggle}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-rose-200 hover:text-white"
             >
-              {isSearchActive ? <X size={20} /> : <Search size={20} />}
+              <X size={16} />
             </button>
-          </div>
+          )}
         </div>
       </div>
-
-      {/* Search */}
-      {isSearchActive && (
-        <div className="px-4 pt-4 pb-2 bg-gradient-to-b from-rose-50 to-white border-b border-rose-100">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search chats and messages..."
-              className="w-full pl-10 pr-4 py-3 rounded-full border border-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white shadow-sm"
-              autoFocus
-            />
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
         {/* Friends Section */}
         {friendChats.length > 0 && (
           <>
-            <div className="px-4 py-2 bg-green-50 border-b border-green-100">
+            <div className="px-4 py-3 bg-green-50 border-b border-green-100">
               <h3 className="text-sm font-semibold text-green-700 flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 Friends ({friendChats.length})
@@ -328,6 +327,8 @@ const ChatPageContent = ({
                 onDelete={handleDelete}
                 longPressedChatId={longPressedChatId}
                 setLongPressedChatId={setLongPressedChatId}
+                isPremium={isPremium}
+                formatLastSeen={formatLastSeen}
               />
             ))}
           </>
@@ -337,7 +338,7 @@ const ChatPageContent = ({
         {regularChats.length > 0 && (
           <>
             {friendChats.length > 0 && (
-              <div className="px-4 py-2 bg-gray-50 border-b border-gray-100">
+              <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
                 <h3 className="text-sm font-semibold text-gray-700">Recent Chats</h3>
               </div>
             )}
@@ -350,6 +351,8 @@ const ChatPageContent = ({
                 onDelete={handleDelete}
                 longPressedChatId={longPressedChatId}
                 setLongPressedChatId={setLongPressedChatId}
+                isPremium={isPremium}
+                formatLastSeen={formatLastSeen}
               />
             ))}
           </>
@@ -387,6 +390,8 @@ const ChatItem = ({
   onDelete,
   longPressedChatId,
   setLongPressedChatId,
+  isPremium,
+  formatLastSeen,
 }: {
   chat: Chat;
   onChatClick: (chat: Chat) => void;
@@ -394,6 +399,8 @@ const ChatItem = ({
   onDelete: (chatId: number) => void;
   longPressedChatId: number | null;
   setLongPressedChatId: (id: number | null) => void;
+  isPremium: boolean;
+  formatLastSeen: (date: Date) => string;
 }) => {
   return (
     <div
@@ -438,9 +445,20 @@ const ChatItem = ({
           </div>
           <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{chat.time}</span>
         </div>
+        
         <p className={`text-sm truncate ${chat.unreadCount > 0 ? 'text-gray-700 font-medium' : 'text-gray-600'}`}>
           {chat.lastMessage}
         </p>
+        
+        {/* Premium Feature: Last Seen */}
+        {isPremium && chat.lastSeen && chat.time !== 'Online' && (
+          <div className="flex items-center gap-1 mt-1">
+            <Clock className="h-3 w-3 text-gray-400" />
+            <span className="text-xs text-gray-400">
+              Last seen {formatLastSeen(chat.lastSeen)}
+            </span>
+          </div>
+        )}
       </div>
 
       {longPressedChatId === chat.id && (
