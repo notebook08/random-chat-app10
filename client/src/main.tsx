@@ -8,6 +8,7 @@ import { SocketProvider } from "./context/SocketProvider.tsx";
 import { ThemeProvider } from "./components/theme-provider.tsx";
 import { PremiumProvider } from "./context/PremiumProvider.tsx";
 import { CoinProvider } from "./context/CoinProvider.tsx";
+import { FriendsProvider } from "./context/FriendsProvider.tsx";
 import { HelmetProvider } from "react-helmet-async";
 
 createRoot(document.getElementById("root")!).render(
@@ -16,11 +17,13 @@ createRoot(document.getElementById("root")!).render(
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <PremiumProvider>
           <CoinProvider>
-            <BrowserRouter>
-              <SocketProvider>
-                <App />
-              </SocketProvider>
-            </BrowserRouter>
+            <FriendsProvider>
+              <BrowserRouter>
+                <SocketProvider>
+                  <App />
+                </SocketProvider>
+              </BrowserRouter>
+            </FriendsProvider>
           </CoinProvider>
         </PremiumProvider>
       </ThemeProvider>

@@ -3,6 +3,7 @@ import { playSound } from "../lib/audio";
 import { useSocket } from "../context/SocketProvider";
 import { usePremium } from "../context/PremiumProvider";
 import { useCoin } from "../context/CoinProvider";
+import { useFriends } from "../context/FriendsProvider";
 import peerservice from "../service/peer";
 import ReactPlayer from "react-player";
 import { Button } from "../components/ui/button";
@@ -12,6 +13,8 @@ import PremiumPaywall from "../components/PremiumPaywall";
 import TreasureChest from "../components/TreasureChest";
 import ReportUserModal from "../components/ReportUserModal";
 import BlockUserModal from "../components/BlockUserModal";
+import StayConnectedModal from "../components/StayConnectedModal";
+import FriendNotification from "../components/FriendNotification";
 import { ScreenShare, ArrowLeft, SkipForward, Crown, Video, VideoOff, Mic, MicOff, Coins } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 import { useTheme } from "../components/theme-provider";
@@ -37,6 +40,7 @@ export default function VideoChat() {
   const { socket } = useSocket();
   const { isPremium, setPremium } = usePremium();
   const { coins } = useCoin();
+  const { addFriend, canAddMoreFriends, friends } = useFriends();
   const location = useLocation();
   const [remoteChatToken, setRemoteChatToken] = useState<string | null>(null);
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
@@ -54,6 +58,18 @@ export default function VideoChat() {
   const [isVoiceOnly, setIsVoiceOnly] = useState(false);
   const [partnerPremium, setPartnerPremium] = useState(false);
 
+  // Friends system state
+  const [showStayConnected, setShowStayConnected] = useState(false);
+  const [partnerWantsToStay, setPartnerWantsToStay] = useState<boolean | null>(null);
+  const [myStayResponse, setMyStayResponse] = useState<boolean | null>(null);
+  const [partnerName, setPartnerName] = useState("Stranger");
+  const [isFriendCall, setIsFriendCall] = useState(false);
+  const [friendNotification, setFriendNotification] = useState<{
+    show: boolean;
+    friendName: string;
+    friendId: string;
+  }>({ show: false, friendName: '', friendId: '' });
+
   // Reporting state
   const [showReport, setShowReport] = useState(false);
   const [showReportEnd, setShowReportEnd] = useState(false);
@@ -69,14 +85,48 @@ export default function VideoChat() {
 
   const loaderColor = theme === "dark" ? "#D1D5DB" : "#4B5563";
 
-  // Initialize voice-only mode from location state
+  // Check if this is a friend call
   useEffect(() => {
-    const state = location.state as { genderFilter?: string; voiceOnly?: boolean };
+    const state = location.state as { 
+      genderFilter?: string; 
+      voiceOnly?: boolean;
+      friendCall?: boolean;
+      friendId?: string;
+      friendName?: string;
+    };
+    
+    if (state?.friendCall) {
+      setIsFriendCall(true);
+      setPartnerName(state.friendName || "Friend");
+      // Show rewarded ad for friend calls
+      setTimeout(() => {
+        alert("🎬 Enjoy your call! Another ad will show after the call ends.");
+      }, 1000);
+    }
+    
     if (state?.voiceOnly && isPremium) {
       setIsVoiceOnly(true);
       setIsCameraOn(false);
     }
   }, [location.state, isPremium]);
+
+  // Show friend online notifications
+  useEffect(() => {
+    const checkOnlineFriends = () => {
+      const onlineFriends = friends.filter(friend => friend.isOnline);
+      if (onlineFriends.length > 0 && Math.random() < 0.3) { // 30% chance
+        const randomFriend = onlineFriends[Math.floor(Math.random() * onlineFriends.length)];
+        setFriendNotification({
+          show: true,
+          friendName: randomFriend.name,
+          friendId: randomFriend.id
+        });
+      }
+    };
+
+    const interval = setInterval(checkOnlineFriends, 30000); // Check every 30 seconds
+    return () => clearInterval(interval);
+  }, [friends]);
 
   const handlePremiumPurchase = useCallback((plan: string) => {
     console.log(`Processing payment for ${plan} plan`);
@@ -96,9 +146,14 @@ export default function VideoChat() {
   }, [setPremium]);
 
   const handleTimeUp = useCallback(() => {
-    // This will be handled by the SevenMinuteTimer component
-    handleSkip();
-  }, []);
+    if (!isFriendCall) {
+      setShowStayConnected(true);
+    } else {
+      // Show ad after friend call ends
+      alert("🎬 Thanks for using AjnabiCam! Here's your post-call ad.");
+      handleSkip();
+    }
+  }, [isFriendCall]);
 
   const handleUpgrade = useCallback(() => {
     setShowPaywall(true);
@@ -107,6 +162,43 @@ export default function VideoChat() {
   const handleUseCoin = useCallback(() => {
     console.log("Used 10 coins to extend timer");
   }, []);
+
+  const handleStayConnected = useCallback((wantToStay: boolean) => {
+    setMyStayResponse(wantToStay);
+    
+    if (wantToStay) {
+      // Check if user can add more friends
+      if (!canAddMoreFriends) {
+        setShowStayConnected(false);
+        setShowPaywall(true);
+        return;
+      }
+      
+      // Send stay connected request to partner
+      socket?.emit("stay:connected:request", { 
+        targetChatToken: remoteChatToken,
+        wantToStay: true 
+      });
+    } else {
+      socket?.emit("stay:connected:request", { 
+        targetChatToken: remoteChatToken,
+        wantToStay: false 
+      });
+      setShowStayConnected(false);
+      handleSkip();
+    }
+  }, [canAddMoreFriends, remoteChatToken, socket]);
+
+  const handleFriendCall = (friendId: string) => {
+    setFriendNotification({ show: false, friendName: '', friendId: '' });
+    navigate('/video-chat', { 
+      state: { 
+        friendCall: true, 
+        friendId, 
+        friendName: friends.find(f => f.id === friendId)?.name || 'Friend'
+      } 
+    });
+  };
 
   const getUserStream = useCallback(async () => {
     try {
@@ -393,6 +485,11 @@ export default function VideoChat() {
   );
 
   const handleSkip = useCallback(async () => {
+    if (!isFriendCall && remoteChatToken) {
+      setShowStayConnected(true);
+      return;
+    }
+
     peerservice.peer.getTransceivers().forEach((transceiver) => {
       if (transceiver.stop) {
         transceiver.stop();
@@ -421,7 +518,7 @@ export default function VideoChat() {
     setRemoteChatToken(null);
 
     socket?.emit("skip");
-  }, [socket]);
+  }, [socket, isFriendCall, remoteChatToken]);
 
   useEffect(() => {
     if (flag !== true) {
@@ -519,6 +616,48 @@ export default function VideoChat() {
       socket?.off("ice-candidate");
     };
   }, [socket]);
+
+  // Handle stay connected responses
+  useEffect(() => {
+    socket?.on("stay:connected:response", ({ wantToStay, from }: { wantToStay: boolean, from: string }) => {
+      setPartnerWantsToStay(wantToStay);
+      
+      if (myStayResponse === true && wantToStay === true) {
+        // Both want to stay connected - add as friends
+        const success = addFriend({
+          id: from,
+          name: partnerName,
+          avatar: `https://images.pexels.com/photos/${Math.floor(Math.random() * 1000000)}/pexels-photo.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop`,
+          isOnline: true
+        });
+        
+        if (success) {
+          alert(`🎉 You and ${partnerName} are now friends! You can find them in your Friends list.`);
+        } else {
+          alert(`❌ Couldn't add ${partnerName} as friend. You've reached the free limit of 3 friends. Upgrade to Premium for unlimited friends!`);
+          setShowPaywall(true);
+        }
+        
+        setShowStayConnected(false);
+        handleSkip();
+      } else if (myStayResponse !== null) {
+        // One or both don't want to stay connected
+        setShowStayConnected(false);
+        handleSkip();
+      }
+    });
+
+    socket?.on("stay:connected:request", ({ wantToStay, from }: { wantToStay: boolean, from: string }) => {
+      if (wantToStay) {
+        setShowStayConnected(true);
+      }
+    });
+
+    return () => {
+      socket?.off("stay:connected:response");
+      socket?.off("stay:connected:request");
+    };
+  }, [socket, myStayResponse, partnerName, addFriend, handleSkip]);
 
   useEffect(() => {
     socket?.on("user:connect", handleUserJoined);
@@ -656,7 +795,12 @@ export default function VideoChat() {
           </Button>
           
           <div className="flex-1 flex justify-center">
-            <span className="font-bold text-xl text-rose-600 tracking-wide">AjnabiCam</span>
+            <div className="text-center">
+              <span className="font-bold text-xl text-rose-600 tracking-wide block">AjnabiCam</span>
+              {isFriendCall && (
+                <span className="text-xs text-green-600 font-medium">Friend Call</span>
+              )}
+            </div>
           </div>
           
           <Button
@@ -669,15 +813,17 @@ export default function VideoChat() {
         </div>
       </div>
 
-      {/* Timer */}
-      <div className="absolute top-24 left-1/2 -translate-x-1/2 z-30">
-        <SevenMinuteTimer
-          isConnected={remoteChatToken !== null}
-          onTimeUp={handleTimeUp}
-          onUpgrade={handleUpgrade}
-          onUseCoin={handleUseCoin}
-        />
-      </div>
+      {/* Timer - only show for non-friend calls */}
+      {!isFriendCall && (
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-30">
+          <SevenMinuteTimer
+            isConnected={remoteChatToken !== null}
+            onTimeUp={handleTimeUp}
+            onUpgrade={handleUpgrade}
+            onUseCoin={handleUseCoin}
+          />
+        </div>
+      )}
 
       {/* Video Streams - Increased height and positioned closer to top */}
       <div className="flex-1 flex flex-col items-center justify-start w-full px-2 pb-32 pt-4 relative">
@@ -686,7 +832,12 @@ export default function VideoChat() {
             isVoiceOnly ? (
               <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-blue-400 to-teal-400">
                 <div className="text-7xl mb-2">🎙️</div>
-                <p className="text-white text-lg font-semibold drop-shadow">Partner's Voice</p>
+                <p className="text-white text-lg font-semibold drop-shadow">{partnerName}'s Voice</p>
+                {isFriendCall && (
+                  <div className="mt-2 bg-green-500 px-3 py-1 rounded-full">
+                    <span className="text-white text-sm font-bold">Friend</span>
+                  </div>
+                )}
               </div>
             ) : (
               <ReactPlayer
@@ -701,7 +852,9 @@ export default function VideoChat() {
           ) : (
             <div className="flex flex-col items-center justify-center w-full h-full bg-gray-300">
               <ClipLoader color={loaderColor} size={40} />
-              <p className="text-gray-500 mt-2 text-xs">Waiting for user to connect...</p>
+              <p className="text-gray-500 mt-2 text-xs">
+                {isFriendCall ? `Calling ${partnerName}...` : "Waiting for user to connect..."}
+              </p>
             </div>
           )}
           
@@ -716,6 +869,13 @@ export default function VideoChat() {
                 width="100%"
                 height="100%"
               />
+            </div>
+          )}
+
+          {/* Friend indicator overlay */}
+          {isFriendCall && remoteStream && (
+            <div className="absolute top-4 left-4 bg-green-500 px-3 py-1 rounded-full z-30">
+              <span className="text-white text-sm font-bold">👥 Friend Call</span>
             </div>
           )}
         </div>
@@ -743,7 +903,7 @@ export default function VideoChat() {
             disabled={remoteChatToken === null}
           >
             <SkipForward size={22} />
-            <span className="ml-2">Skip</span>
+            <span className="ml-2">{isFriendCall ? "End" : "Skip"}</span>
           </Button>
           
           <Button 
@@ -772,20 +932,22 @@ export default function VideoChat() {
           </Button>
         </div>
         
-        <div className="w-full max-w-md mx-auto flex flex-row gap-2 mt-2">
-          <Button 
-            className="flex-1 bg-gray-100 text-gray-700 font-semibold rounded-xl" 
-            onClick={() => setShowBlock(true)}
-          >
-            Block
-          </Button>
-          <Button 
-            className="flex-1 bg-rose-100 text-rose-700 font-semibold rounded-xl" 
-            onClick={() => setShowReport(true)}
-          >
-            Report
-          </Button>
-        </div>
+        {!isFriendCall && (
+          <div className="w-full max-w-md mx-auto flex flex-row gap-2 mt-2">
+            <Button 
+              className="flex-1 bg-gray-100 text-gray-700 font-semibold rounded-xl" 
+              onClick={() => setShowBlock(true)}
+            >
+              Block
+            </Button>
+            <Button 
+              className="flex-1 bg-rose-100 text-rose-700 font-semibold rounded-xl" 
+              onClick={() => setShowReport(true)}
+            >
+              Report
+            </Button>
+          </div>
+        )}
         
         {isPremium && (
           <div className="w-full max-w-md mx-auto mt-2">
@@ -795,6 +957,15 @@ export default function VideoChat() {
           </div>
         )}
       </div>
+
+      {/* Friend Notification */}
+      {friendNotification.show && (
+        <FriendNotification
+          friendName={friendNotification.friendName}
+          onCall={() => handleFriendCall(friendNotification.friendId)}
+          onDismiss={() => setFriendNotification({ show: false, friendName: '', friendId: '' })}
+        />
+      )}
 
       {/* Modals */}
       <PremiumPaywall
@@ -806,6 +977,13 @@ export default function VideoChat() {
       <TreasureChest
         isOpen={showTreasureChest}
         onClose={() => setShowTreasureChest(false)}
+      />
+
+      <StayConnectedModal
+        isOpen={showStayConnected}
+        onClose={() => setShowStayConnected(false)}
+        onStayConnected={handleStayConnected}
+        partnerName={partnerName}
       />
       
       <ReportUserModal

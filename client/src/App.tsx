@@ -13,6 +13,7 @@ import HomePage from "./screens/HomePage";
 import ProfilePage from "./screens/ProfilePage";
 import UserSetup from "./screens/UserSetup";
 import PersonalChat from "./screens/PersonalChat";
+import FriendsPage from "./screens/FriendsPage";
 
 import { useNavigate } from "react-router-dom";
 
@@ -55,6 +56,7 @@ function App() {
         <Route path="/voice" element={<VoicePage />} />
         <Route path="/personal-chat" element={<PersonalChat />} />
         <Route path="/chat" element={<ChatPage />} />
+        <Route path="/friends" element={<FriendsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/refer" element={<ReferToUnlock />} />
         <Route path="/referral-code" element={<ReferralCodeScreen />} />
