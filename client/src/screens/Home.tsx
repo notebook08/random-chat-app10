@@ -13,10 +13,10 @@ import { usePremium } from "../context/PremiumProvider";
 import { useCoin } from "../context/CoinProvider";
 
 const bannerImages = [
-  'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop',
-  'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop',
-  'https://images.pexels.com/photos/3184293/pexels-photo-3184293.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop',
-  'https://images.pexels.com/photos/3184294/pexels-photo-3184294.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop'
+  'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800&h=200&fit=crop',
+  'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=800&h=200&fit=crop',
+  'https://images.pexels.com/photos/3184293/pexels-photo-3184293.jpeg?auto=compress&cs=tinysrgb&w=800&h=200&fit=crop',
+  'https://images.pexels.com/photos/3184294/pexels-photo-3184294.jpeg?auto=compress&cs=tinysrgb&w=800&h=200&fit=crop'
 ];
 
 export default function Home() {
@@ -71,9 +71,6 @@ export default function Home() {
         {/* Header */}
         <header className="w-full flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm shadow-sm">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
-              AjnabiCam
-            </h1>
             {isPremium && (
               <Crown className="h-5 w-5 text-yellow-500" />
             )}
@@ -90,8 +87,18 @@ export default function Home() {
         </header>
 
         <div className="flex-1 flex flex-col items-center px-4 py-6">
-          {/* Banner Carousel */}
+          {/* Banner Carousel with App Name Overlay */}
           <div className="w-full max-w-md mb-6 relative">
+            {/* App Name and Tagline Overlay */}
+            <div className="absolute top-4 left-4 z-10">
+              <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-1">
+                AjnabiCam
+              </h1>
+              <p className="text-white/90 text-sm font-medium drop-shadow-md">
+                Connect with strangers instantly
+              </p>
+            </div>
+
             <div className="overflow-hidden rounded-2xl shadow-lg">
               <div
                 className="flex transition-transform duration-700 ease-in-out"
@@ -102,8 +109,10 @@ export default function Home() {
                     <img
                       src={image}
                       alt={`Banner ${index + 1}`}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-32 object-cover"
                     />
+                    {/* Dark overlay for better text readability */}
+                    <div className="absolute inset-0 bg-black/30 rounded-2xl"></div>
                   </div>
                 ))}
               </div>
@@ -121,29 +130,6 @@ export default function Home() {
                 />
               ))}
             </div>
-          </div>
-
-          {/* Treasure Chest Animation */}
-          <div className="w-full max-w-md mb-6 flex justify-center">
-            <Button
-              onClick={() => setShowTreasureChest(true)}
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-200 relative overflow-hidden"
-            >
-              <div className="flex items-center gap-3">
-                {/* Animated Treasure Chest */}
-                <div className="relative">
-                  <div className="w-8 h-6 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-md relative">
-                    <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-t-md"></div>
-                    <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gray-600 rounded-full"></div>
-                  </div>
-                  <div className="absolute -top-1 -right-1 text-yellow-200 text-xs animate-pulse">✨</div>
-                </div>
-                <div>
-                  <div className="text-lg font-bold">Coin Treasure</div>
-                  <div className="text-sm opacity-90">Tap to open!</div>
-                </div>
-              </div>
-            </Button>
           </div>
 
           {/* Features Grid */}
