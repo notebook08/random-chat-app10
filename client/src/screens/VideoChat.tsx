@@ -2,15 +2,17 @@ import { useCallback, useEffect, useState } from "react";
 import { playSound } from "../lib/audio";
 import { useSocket } from "../context/SocketProvider";
 import { usePremium } from "../context/PremiumProvider";
+import { useCoin } from "../context/CoinProvider";
 import peerservice from "../service/peer";
 import ReactPlayer from "react-player";
 import { Button } from "../components/ui/button";
 import Messages from "../components/Messages";
-import ChatTimer from "../components/ChatTimer";
+import SevenMinuteTimer from "../components/SevenMinuteTimer";
 import PremiumPaywall from "../components/PremiumPaywall";
+import TreasureChest from "../components/TreasureChest";
 import ReportUserModal from "../components/ReportUserModal";
 import BlockUserModal from "../components/BlockUserModal";
-import { ScreenShare, ArrowLeft, SkipForward, Crown, Video, VideoOff, Mic, MicOff } from "lucide-react";
+import { ScreenShare, ArrowLeft, SkipForward, Crown, Video, VideoOff, Mic, MicOff, Coins } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 import { useTheme } from "../components/theme-provider";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -34,6 +36,7 @@ interface NegotiationDone {
 export default function VideoChat() {
   const { socket } = useSocket();
   const { isPremium, setPremium } = usePremium();
+  const { coins } = useCoin();
   const location = useLocation();
   const [remoteChatToken, setRemoteChatToken] = useState<string | null>(null);
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
@@ -47,6 +50,7 @@ export default function VideoChat() {
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showTreasureChest, setShowTreasureChest] = useState(false);
   const [isVoiceOnly, setIsVoiceOnly] = useState(false);
   const [partnerPremium, setPartnerPremium] = useState(false);
 
@@ -75,10 +79,8 @@ export default function VideoChat() {
   }, [location.state, isPremium]);
 
   const handlePremiumPurchase = useCallback((plan: string) => {
-    // Simulate payment processing
     console.log(`Processing payment for ${plan} plan`);
     
-    // Calculate expiry date
     const now = new Date();
     const expiry = new Date(now);
     if (plan === "weekly") {
@@ -87,21 +89,23 @@ export default function VideoChat() {
       expiry.setMonth(now.getMonth() + 1);
     }
     
-    // Set premium status
     setPremium(true, expiry);
     setShowPaywall(false);
     
-    // Show success message
     alert(`🎉 Welcome to Premium! Your ${plan} subscription is now active until ${expiry.toLocaleDateString()}`);
   }, [setPremium]);
 
   const handleTimeUp = useCallback(() => {
-    alert("⏰ Time's up! Your 15-minute chat session with this person has ended. Upgrade to Premium to continue chatting with them!");
+    // This will be handled by the SevenMinuteTimer component
     handleSkip();
   }, []);
 
   const handleUpgrade = useCallback(() => {
     setShowPaywall(true);
+  }, []);
+
+  const handleUseCoin = useCallback(() => {
+    console.log("Used 10 coins to extend timer");
   }, []);
 
   const getUserStream = useCallback(async () => {
@@ -139,7 +143,6 @@ export default function VideoChat() {
         .find((s) => s.track?.kind === "video");
 
       if (isCameraOn) {
-        // Turn off camera
         if (videoTrack) {
           videoTrack.stop();
           myStream.removeTrack(videoTrack);
@@ -148,7 +151,6 @@ export default function VideoChat() {
           await sender.replaceTrack(null);
         }
       } else {
-        // Turn on camera
         const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
         const newVideoTrack = newStream.getVideoTracks()[0];
         myStream.addTrack(newVideoTrack);
@@ -172,7 +174,6 @@ export default function VideoChat() {
         .find((s) => s.track?.kind === "audio");
 
       if (isMicOn) {
-        // Turn off mic
         if (audioTrack) {
           audioTrack.stop();
           myStream.removeTrack(audioTrack);
@@ -181,7 +182,6 @@ export default function VideoChat() {
           await sender.replaceTrack(null);
         }
       } else {
-        // Turn on mic
         const newStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const newAudioTrack = newStream.getAudioTracks()[0];
         myStream.addTrack(newAudioTrack);
@@ -656,17 +656,22 @@ export default function VideoChat() {
         <div className="flex-1 flex justify-center">
           <span className="font-bold text-lg text-rose-500 tracking-wide">AjnabiCam</span>
         </div>
-        <div className="w-10" />
+        <Button
+          onClick={() => setShowTreasureChest(true)}
+          className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-3 py-2 rounded-full shadow-md"
+        >
+          <Coins className="h-4 w-4 mr-1" />
+          {coins}
+        </Button>
       </div>
 
       {/* Timer */}
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30">
-        <ChatTimer
-          isPremium={isPremium}
+        <SevenMinuteTimer
           isConnected={remoteChatToken !== null}
-          partnerPremium={partnerPremium}
           onTimeUp={handleTimeUp}
           onUpgrade={handleUpgrade}
+          onUseCoin={handleUseCoin}
         />
       </div>
 
@@ -793,6 +798,12 @@ export default function VideoChat() {
         onClose={() => setShowPaywall(false)}
         onPurchase={handlePremiumPurchase}
       />
+      
+      <TreasureChest
+        isOpen={showTreasureChest}
+        onClose={() => setShowTreasureChest(false)}
+      />
+      
       <ReportUserModal
         isOpen={showReport}
         onClose={() => setShowReport(false)}

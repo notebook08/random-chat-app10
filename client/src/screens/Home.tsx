@@ -4,11 +4,13 @@ import { playSound } from "../lib/audio";
 import { useSocket } from "../context/SocketProvider";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Crown } from "lucide-react";
+import { Crown, Coins } from "lucide-react";
 import GenderFilter from "../components/GenderFilter";
 import PremiumPaywall from "../components/PremiumPaywall";
+import TreasureChest from "../components/TreasureChest";
 import BottomNavBar from "../components/BottomNavBar";
 import { usePremium } from "../context/PremiumProvider";
+import { useCoin } from "../context/CoinProvider";
 
 const bannerImages = [
   'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop',
@@ -21,8 +23,10 @@ export default function Home() {
   const { socket } = useSocket();
   const navigate = useNavigate();
   const { isPremium, setPremium } = usePremium();
+  const { coins } = useCoin();
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showTreasureChest, setShowTreasureChest] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -74,6 +78,15 @@ export default function Home() {
               <Crown className="h-5 w-5 text-yellow-500" />
             )}
           </div>
+          
+          {/* Coin Balance */}
+          <Button
+            onClick={() => setShowTreasureChest(true)}
+            className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-4 py-2 rounded-full shadow-md transform hover:scale-105 transition-all duration-200"
+          >
+            <Coins className="h-4 w-4 mr-2" />
+            {coins}
+          </Button>
         </header>
 
         <div className="flex-1 flex flex-col items-center px-4 py-6">
@@ -108,6 +121,29 @@ export default function Home() {
                 />
               ))}
             </div>
+          </div>
+
+          {/* Treasure Chest Animation */}
+          <div className="w-full max-w-md mb-6 flex justify-center">
+            <Button
+              onClick={() => setShowTreasureChest(true)}
+              className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-200 relative overflow-hidden"
+            >
+              <div className="flex items-center gap-3">
+                {/* Animated Treasure Chest */}
+                <div className="relative">
+                  <div className="w-8 h-6 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-md relative">
+                    <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-t-md"></div>
+                    <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gray-600 rounded-full"></div>
+                  </div>
+                  <div className="absolute -top-1 -right-1 text-yellow-200 text-xs animate-pulse">✨</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold">Coin Treasure</div>
+                  <div className="text-sm opacity-90">Tap to open!</div>
+                </div>
+              </div>
+            </Button>
           </div>
 
           {/* Features Grid */}
@@ -162,6 +198,11 @@ export default function Home() {
         isOpen={showPaywall}
         onClose={() => setShowPaywall(false)}
         onPurchase={handlePremiumPurchase}
+      />
+
+      <TreasureChest
+        isOpen={showTreasureChest}
+        onClose={() => setShowTreasureChest(false)}
       />
     </>
   );
