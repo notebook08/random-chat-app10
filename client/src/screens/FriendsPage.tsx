@@ -77,26 +77,26 @@ const FriendsPage: React.FC = () => {
       <Helmet>
         <title>AjnabiCam - Friends</title>
       </Helmet>
-      <main className="flex flex-col items-center min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 px-2 py-4 relative pb-20">
+      <main className="flex flex-col items-center min-h-screen w-full max-w-md mx-auto bg-white px-2 py-4 relative pb-20">
         {/* Header */}
-        <div className="w-full max-w-md flex items-center p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xl rounded-t-2xl shadow-lg">
+        <div className="w-full flex items-center p-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold text-xl rounded-t-2xl shadow-lg">
           <button 
             onClick={handleBackClick} 
             className="mr-3 text-white font-bold text-xl hover:scale-110 transition-transform"
           >
-            &larr;
+            <ArrowLeft size={24} />
           </button>
           <h1 className="flex-grow text-center">Friends</h1>
           <Users className="h-6 w-6" />
         </div>
 
-        <div className="w-full max-w-md flex flex-col bg-white rounded-b-2xl border border-blue-100 shadow-xl mb-6 overflow-hidden">
+        <div className="w-full flex flex-col bg-white rounded-b-2xl border border-pink-100 shadow-xl mb-6 overflow-hidden">
           {/* Friends Limit Info */}
-          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
+          <div className="p-4 bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-blue-800">Your Friends</h3>
-                <p className="text-sm text-blue-600">
+                <h3 className="font-semibold text-rose-800">Your Friends</h3>
+                <p className="text-sm text-rose-600">
                   {isPremium 
                     ? `${friends.length} friends (Unlimited)` 
                     : `${friends.length}/${maxFreeLimit} friends (Free)`
@@ -131,13 +131,13 @@ const FriendsPage: React.FC = () => {
               friends.map((friend) => (
                 <div
                   key={friend.id}
-                  className="flex items-center p-4 border-b border-gray-100 hover:bg-blue-50 transition-colors"
+                  className="flex items-center p-4 border-b border-pink-100 hover:bg-pink-50 transition-colors"
                 >
                   <div className="relative">
                     <img
                       src={friend.avatar}
                       alt={`${friend.name} avatar`}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-blue-200"
+                      className="w-12 h-12 rounded-full object-cover border-2 border-pink-200"
                     />
                     {friend.isOnline && (
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
@@ -172,7 +172,7 @@ const FriendsPage: React.FC = () => {
                       onClick={() => handleRemoveFriend(friend.id, friend.name)}
                       size="sm"
                       variant="outline"
-                      className="text-red-500 hover:bg-red-50 p-2"
+                      className="text-red-500 hover:bg-red-50 p-2 border-red-200"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -188,7 +188,7 @@ const FriendsPage: React.FC = () => {
                 </p>
                 <Button
                   onClick={() => navigate('/video-chat')}
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
+                  className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
                   Start Meeting People

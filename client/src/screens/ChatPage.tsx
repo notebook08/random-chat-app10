@@ -131,7 +131,7 @@ const PersonalChat = ({
   };
 
   return (
-    <div className="max-w-md mx-auto h-screen bg-gradient-to-br from-rose-50 to-pink-100 shadow-xl overflow-hidden flex flex-col relative pb-20">
+    <div className="max-w-md mx-auto h-screen bg-white shadow-xl overflow-hidden flex flex-col relative pb-20">
       {/* Enhanced Header */}
       <div className="p-4 bg-gradient-to-r from-rose-500 to-pink-600 flex items-center shadow-lg">
         <button 

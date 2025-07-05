@@ -67,20 +67,10 @@ export default function Home() {
       <Helmet>
         <title>AjnabiCam - Random Video Chat - Live chat with ajnabis</title>
       </Helmet>
-      <main className="flex flex-col min-h-screen w-full bg-gradient-to-br from-rose-50 to-pink-100 relative pb-20">
-        {/* Enhanced Header with increased height */}
-        <header className="w-full bg-white/95 backdrop-blur-sm shadow-lg px-4 py-6 border-b border-rose-100">
-          <div className="flex items-center justify-between max-w-md mx-auto">
-            {/* App Name and Tagline */}
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent mb-1">
-                AjnabiCam
-              </h1>
-              <p className="text-gray-600 text-sm font-medium">
-                Connect with strangers instantly
-              </p>
-            </div>
-
+      <main className="flex flex-col min-h-screen w-full max-w-md mx-auto bg-white relative pb-20">
+        {/* Enhanced Header */}
+        <header className="w-full bg-white shadow-sm px-4 py-4 border-b border-pink-100">
+          <div className="flex items-center justify-between">
             {/* Premium Badge and Coin Button */}
             <div className="flex items-center gap-3">
               {isPremium && (
@@ -89,21 +79,31 @@ export default function Home() {
                   <span className="text-white text-xs font-bold">PREMIUM</span>
                 </div>
               )}
-              
-              <Button
-                onClick={() => setShowTreasureChest(true)}
-                className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-4 py-2 rounded-full shadow-md transform hover:scale-105 transition-all duration-200"
-              >
-                <Coins className="h-4 w-4 mr-2" />
-                {coins}
-              </Button>
             </div>
+            
+            <Button
+              onClick={() => setShowTreasureChest(true)}
+              className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-4 py-2 rounded-full shadow-md transform hover:scale-105 transition-all duration-200"
+            >
+              <Coins className="h-4 w-4 mr-2" />
+              {coins}
+            </Button>
           </div>
         </header>
 
-        <div className="flex-1 flex flex-col items-center px-4 py-6">
+        <div className="flex-1 flex flex-col px-4 py-4">
+          {/* App Name aligned with banner */}
+          <div className="mb-4">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
+              AjnabiCam
+            </h1>
+            <p className="text-gray-600 text-sm font-medium">
+              Connect with strangers instantly
+            </p>
+          </div>
+
           {/* Banner Carousel */}
-          <div className="w-full max-w-md mb-6 relative">
+          <div className="w-full mb-6 relative">
             <div className="overflow-hidden rounded-2xl shadow-lg">
               <div
                 className="flex transition-transform duration-700 ease-in-out"
@@ -121,14 +121,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Carousel Dots */}
-            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+            {/* Carousel Dots - Made smaller */}
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
               {bannerImages.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentBannerIndex(index)}
-                  className={`h-2 w-2 rounded-full transition-all duration-300 ${
-                    currentBannerIndex === index ? 'bg-white w-6' : 'bg-white/50'
+                  className={`h-1 w-1 rounded-full transition-all duration-300 ${
+                    currentBannerIndex === index ? 'bg-white w-3' : 'bg-white/50'
                   }`}
                 />
               ))}
@@ -136,18 +136,18 @@ export default function Home() {
           </div>
 
           {/* Features Grid */}
-          <div className="w-full max-w-md grid grid-cols-3 gap-3 mb-6">
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 text-center shadow-md">
+          <div className="w-full grid grid-cols-3 gap-3 mb-6">
+            <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center shadow-sm border border-pink-100">
               <span className="text-2xl mb-2 block">🎥</span>
               <div className="font-semibold text-sm text-rose-700">HD Video</div>
               <div className="text-xs text-rose-400">Crystal clear</div>
             </div>
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 text-center shadow-md">
+            <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center shadow-sm border border-pink-100">
               <span className="text-2xl mb-2 block">🔒</span>
               <div className="font-semibold text-sm text-rose-700">Secure</div>
               <div className="text-xs text-rose-400">Encrypted</div>
             </div>
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 text-center shadow-md">
+            <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center shadow-sm border border-pink-100">
               <span className="text-2xl mb-2 block">⚡</span>
               <div className="font-semibold text-sm text-rose-700">Instant</div>
               <div className="text-xs text-rose-400">Connect now</div>
@@ -155,7 +155,7 @@ export default function Home() {
           </div>
 
           {/* Gender Filter */}
-          <div className="w-full max-w-md mb-6">
+          <div className="w-full mb-6">
             <GenderFilter
               isPremium={isPremium}
               onGenderSelect={(gender: string) => {
@@ -166,7 +166,7 @@ export default function Home() {
           </div>
 
           {/* Main Action Button */}
-          <div className="w-full max-w-md">
+          <div className="w-full">
             <Button
               className="w-full py-4 text-lg font-bold rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
               onClick={handleStartCall}

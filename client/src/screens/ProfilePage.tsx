@@ -1,9 +1,8 @@
-
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import BottomNavBar from '../components/BottomNavBar';
-import { Crown, Camera, Copy, Star, Gift } from 'lucide-react';
+import { Crown, Camera, Copy, Star, Gift, ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
 const ProfilePage: React.FC = () => {
@@ -59,15 +58,17 @@ const ProfilePage: React.FC = () => {
       <Helmet>
         <title>AjnabiCam - Profile</title>
       </Helmet>
-      <main className="flex flex-col items-center min-h-screen w-full bg-gradient-to-br from-rose-50 to-pink-100 px-2 py-4 relative pb-20">
+      <main className="flex flex-col items-center min-h-screen w-full max-w-md mx-auto bg-white px-2 py-4 relative pb-20">
         {/* Header */}
-        <div className="w-full max-w-md flex items-center p-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold text-xl rounded-t-2xl shadow-lg">
-          <button onClick={handleBackClick} className="mr-3 text-white font-bold text-xl hover:scale-110 transition-transform">&larr;</button>
+        <div className="w-full flex items-center p-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold text-xl rounded-t-2xl shadow-lg">
+          <button onClick={handleBackClick} className="mr-3 text-white font-bold text-xl hover:scale-110 transition-transform">
+            <ArrowLeft size={24} />
+          </button>
           <h1 className="flex-grow text-center">Profile</h1>
           <Crown className="h-6 w-6 text-yellow-300" />
         </div>
 
-        <div className="w-full max-w-md flex flex-col bg-white rounded-b-2xl border border-rose-100 shadow-xl mb-6 overflow-hidden">
+        <div className="w-full flex flex-col bg-white rounded-b-2xl border border-rose-100 shadow-xl mb-6 overflow-hidden">
           {/* Premium Trial Section */}
           <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 p-6 text-white text-center">
             <div className="flex items-center justify-center mb-3">

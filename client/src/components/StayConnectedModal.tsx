@@ -32,7 +32,7 @@ export default function StayConnectedModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-sm mx-auto bg-gradient-to-br from-pink-50 to-rose-50 border-2 border-rose-200 shadow-2xl">
+      <Card className="w-full max-w-sm mx-auto bg-white border-2 border-rose-200 shadow-2xl">
         <CardHeader className="text-center relative">
           <Button
             variant="ghost"
