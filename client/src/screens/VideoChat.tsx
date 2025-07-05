@@ -159,10 +159,6 @@ export default function VideoChat() {
     setShowPaywall(true);
   }, []);
 
-  const handleUseCoin = useCallback(() => {
-    console.log("Used 10 coins to extend timer");
-  }, []);
-
   const handleStayConnected = useCallback((wantToStay: boolean) => {
     setMyStayResponse(wantToStay);
     
@@ -175,12 +171,12 @@ export default function VideoChat() {
       }
       
       // Send stay connected request to partner
-      socket?.emit("stay:connected:request", { 
+      socket?.emit("stay:connected:response", { 
         targetChatToken: remoteChatToken,
         wantToStay: true 
       });
     } else {
-      socket?.emit("stay:connected:request", { 
+      socket?.emit("stay:connected:response", { 
         targetChatToken: remoteChatToken,
         wantToStay: false 
       });

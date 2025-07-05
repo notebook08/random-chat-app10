@@ -50,13 +50,16 @@ export const FriendsProvider = ({ children }: FriendsProviderProps) => {
         setFriends(parsedFriends);
       } catch (error) {
         console.error("Error loading friends:", error);
+        setFriends([]);
       }
     }
   }, []);
 
   // Save friends to localStorage whenever friends change
   useEffect(() => {
-    localStorage.setItem("ajnabicam_friends", JSON.stringify(friends));
+    if (friends.length >= 0) {
+      localStorage.setItem("ajnabicam_friends", JSON.stringify(friends));
+    }
   }, [friends]);
 
   const addFriend = (newFriend: Omit<Friend, 'addedAt'>): boolean => {
