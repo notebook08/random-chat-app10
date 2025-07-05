@@ -75,28 +75,30 @@ export default function Home() {
               <Crown className="h-5 w-5 text-yellow-500" />
             )}
           </div>
-          
-          {/* Coin Balance */}
-          <Button
-            onClick={() => setShowTreasureChest(true)}
-            className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-4 py-2 rounded-full shadow-md transform hover:scale-105 transition-all duration-200"
-          >
-            <Coins className="h-4 w-4 mr-2" />
-            {coins}
-          </Button>
         </header>
 
         <div className="flex-1 flex flex-col items-center px-4 py-6">
-          {/* Banner Carousel with App Name Overlay */}
+          {/* Banner Carousel with App Name and Coin Button */}
           <div className="w-full max-w-md mb-6 relative">
-            {/* App Name and Tagline Overlay */}
-            <div className="absolute top-4 left-4 z-10">
-              <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-1">
+            {/* App Name positioned above banner at 90 degree angle to coin button */}
+            <div className="absolute -top-12 left-4 z-10">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent mb-1">
                 AjnabiCam
               </h1>
-              <p className="text-white/90 text-sm font-medium drop-shadow-md">
+              <p className="text-gray-600 text-sm font-medium">
                 Connect with strangers instantly
               </p>
+            </div>
+
+            {/* Coin Button positioned at the right where banner ends */}
+            <div className="absolute -top-12 right-4 z-10">
+              <Button
+                onClick={() => setShowTreasureChest(true)}
+                className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-4 py-2 rounded-full shadow-md transform hover:scale-105 transition-all duration-200"
+              >
+                <Coins className="h-4 w-4 mr-2" />
+                {coins}
+              </Button>
             </div>
 
             <div className="overflow-hidden rounded-2xl shadow-lg">
@@ -111,8 +113,6 @@ export default function Home() {
                       alt={`Banner ${index + 1}`}
                       className="w-full h-32 object-cover"
                     />
-                    {/* Dark overlay for better text readability */}
-                    <div className="absolute inset-0 bg-black/30 rounded-2xl"></div>
                   </div>
                 ))}
               </div>
