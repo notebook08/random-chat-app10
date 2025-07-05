@@ -10,8 +10,8 @@ import ChatTimer from "../components/ChatTimer";
 import PremiumPaywall from "../components/PremiumPaywall";
 import ReportUserModal from "../components/ReportUserModal";
 import BlockUserModal from "../components/BlockUserModal";
-import { ScreenShare, StepBack, StepForward, Crown } from "lucide-react";
-import { ClipLoader } from "react-spinners"; // Import the spinner
+import { ScreenShare, ArrowLeft, SkipForward, Crown, Video, VideoOff, Mic, MicOff } from "lucide-react";
+import { ClipLoader } from "react-spinners";
 import { useTheme } from "../components/theme-provider";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../css/VideoChat.css";
@@ -60,10 +60,10 @@ export default function VideoChat() {
   const [showBlock, setShowBlock] = useState(false);
   const [blockSubmitted, setBlockSubmitted] = useState(false);
 
-  const theme = useTheme();
+  const { theme } = useTheme();
   const navigate = useNavigate();
 
-  const loaderColor = theme.theme === "dark" ? "#D1D5DB" : "#4B5563";
+  const loaderColor = theme === "dark" ? "#D1D5DB" : "#4B5563";
 
   // Initialize voice-only mode from location state
   useEffect(() => {
@@ -105,87 +105,98 @@ export default function VideoChat() {
   }, []);
 
   const getUserStream = useCallback(async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: !isVoiceOnly,
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-        sampleRate: 48000, // CD-quality audio sample rate
-        sampleSize: 16, // Higher sample size
-        channelCount: 2 // Stereo audio
-      }
-    });
-    // const processedStream = processAudio(stream);
-    setMyStream(stream);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: !isVoiceOnly,
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 48000,
+          sampleSize: 16,
+          channelCount: 2
+        }
+      });
+      setMyStream(stream);
+    } catch (error) {
+      console.error("Error getting user media:", error);
+    }
   }, [isVoiceOnly]);
 
   useEffect(() => {
-    getUserStream();
+    if (!myStream) {
+      getUserStream();
+    }
   }, [getUserStream, myStream]);
 
-  const toggleCamera = useCallback(() => {
-    if (myStream) {
+  const toggleCamera = useCallback(async () => {
+    if (!myStream) return;
+
+    try {
       const videoTrack = myStream.getVideoTracks()[0];
       const sender = peerservice.peer
         .getSenders()
         .find((s) => s.track?.kind === "video");
 
-      if (videoTrack && sender) {
-        if (isCameraOn) {
-          sender.replaceTrack(null); // Disable video by replacing with null
-          videoTrack.stop(); // Stop the track
-        } else {
-          navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-            const newVideoTrack = stream.getVideoTracks()[0];
-            sender.replaceTrack(newVideoTrack); // Enable video by replacing track
-            setMyStream((prevStream) => {
-              if (prevStream) {
-                prevStream.removeTrack(videoTrack);
-                prevStream.addTrack(newVideoTrack);
-              }
-              return prevStream;
-            });
-          });
+      if (isCameraOn) {
+        // Turn off camera
+        if (videoTrack) {
+          videoTrack.stop();
+          myStream.removeTrack(videoTrack);
         }
-        setIsCameraOn(!isCameraOn); // Update the camera state
+        if (sender) {
+          await sender.replaceTrack(null);
+        }
+      } else {
+        // Turn on camera
+        const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const newVideoTrack = newStream.getVideoTracks()[0];
+        myStream.addTrack(newVideoTrack);
+        if (sender) {
+          await sender.replaceTrack(newVideoTrack);
+        }
       }
+      setIsCameraOn(!isCameraOn);
+    } catch (error) {
+      console.error("Error toggling camera:", error);
     }
   }, [myStream, isCameraOn]);
 
-  const toggleMic = useCallback(() => {
-    if (myStream) {
+  const toggleMic = useCallback(async () => {
+    if (!myStream) return;
+
+    try {
       const audioTrack = myStream.getAudioTracks()[0];
       const sender = peerservice.peer
         .getSenders()
         .find((s) => s.track?.kind === "audio");
 
-      if (audioTrack && sender) {
-        if (isMicOn) {
-          sender.replaceTrack(null); // Disable audio by replacing with null
-          audioTrack.stop(); // Stop the track
-        } else {
-          navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-            const newAudioTrack = stream.getAudioTracks()[0];
-            sender.replaceTrack(newAudioTrack); // Enable audio by replacing track
-            setMyStream((prevStream) => {
-              if (prevStream) {
-                prevStream.removeTrack(audioTrack);
-                prevStream.addTrack(newAudioTrack);
-              }
-              return prevStream;
-            });
-          });
+      if (isMicOn) {
+        // Turn off mic
+        if (audioTrack) {
+          audioTrack.stop();
+          myStream.removeTrack(audioTrack);
         }
-        setIsMicOn(!isMicOn); // Update the mic state
+        if (sender) {
+          await sender.replaceTrack(null);
+        }
+      } else {
+        // Turn on mic
+        const newStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const newAudioTrack = newStream.getAudioTracks()[0];
+        myStream.addTrack(newAudioTrack);
+        if (sender) {
+          await sender.replaceTrack(newAudioTrack);
+        }
       }
+      setIsMicOn(!isMicOn);
+    } catch (error) {
+      console.error("Error toggling mic:", error);
     }
   }, [myStream, isMicOn]);
 
-
   const sendStream = useCallback(() => {
     if (myStream) {
-      // console.log("send Stream");
       const videoTrack = myStream.getVideoTracks()[0];
       const audioTrack = myStream.getAudioTracks()[0];
 
@@ -194,48 +205,44 @@ export default function VideoChat() {
       if (videoTrack) {
         const videoSender = senders.find((s) => s.track === videoTrack);
         if (!videoSender) {
-          peerservice.peer.addTrack(videoTrack, myStream); // Add video first
+          peerservice.peer.addTrack(videoTrack, myStream);
         }
       }
 
       if (audioTrack) {
         const audioSender = senders.find((s) => s.track === audioTrack);
         if (!audioSender) {
-          peerservice.peer.addTrack(audioTrack, myStream); // Add audio second
+          peerservice.peer.addTrack(audioTrack, myStream);
         }
       }
     }
   }, [myStream]);
 
   const handleScreenShare = useCallback(async () => {
-    if (isScreenSharing) {
-      const videoTrack = myStream?.getVideoTracks()[0];
-      const screenSender = peerservice.peer
-        .getSenders()
-        .find((s) => s.track?.kind === "video");
+    try {
+      if (isScreenSharing) {
+        const videoTrack = myStream?.getVideoTracks()[0];
+        const screenSender = peerservice.peer
+          .getSenders()
+          .find((s) => s.track?.kind === "video");
 
-      if (videoTrack && screenSender) {
-        screenSender.replaceTrack(videoTrack);
-      }
+        if (videoTrack && screenSender) {
+          await screenSender.replaceTrack(videoTrack);
+        }
 
-      // Stop all tracks in the screen stream
-      screenStream?.getTracks().forEach((track) => track.stop());
-      setScreenStream(null);
-      setMyStream(myStream); // Reset local view back to the webcam stream
-      setIsScreenSharing(false);
+        screenStream?.getTracks().forEach((track) => track.stop());
+        setScreenStream(null);
+        setIsScreenSharing(false);
 
-      // Renegotiate after stopping screen sharing
-      if (peerservice.peer.signalingState === "stable") {
-        const offer = await peerservice.getOffer();
-        socket?.emit("peer:nego:needed", { offer, targetChatToken: remoteChatToken });
-      }
-    } else {
-      try {
+        if (peerservice.peer.signalingState === "stable") {
+          const offer = await peerservice.getOffer();
+          socket?.emit("peer:nego:needed", { offer, targetChatToken: remoteChatToken });
+        }
+      } else {
         const stream = await navigator.mediaDevices.getDisplayMedia({
           video: true
         });
         setScreenStream(stream);
-        setMyStream(stream);
         setIsScreenSharing(true);
 
         const screenTrack = stream.getVideoTracks()[0];
@@ -244,7 +251,7 @@ export default function VideoChat() {
           .find((s) => s.track?.kind === "video");
 
         if (videoSender) {
-          videoSender.replaceTrack(screenTrack);
+          await videoSender.replaceTrack(screenTrack);
         } else {
           peerservice.peer.addTrack(screenTrack, stream);
         }
@@ -253,9 +260,9 @@ export default function VideoChat() {
           const offer = await peerservice.getOffer();
           socket?.emit("peer:nego:needed", { offer, targetChatToken: remoteChatToken });
         }
-      } catch (error) {
-        console.error("Error sharing screen:", error);
       }
+    } catch (error) {
+      console.error("Error sharing screen:", error);
     }
   }, [isScreenSharing, myStream, screenStream, remoteChatToken, socket]);
 
@@ -265,19 +272,19 @@ export default function VideoChat() {
       .find((s) => s.track && s.track.kind === "audio");
     if (sender) {
       const parameters = sender.getParameters();
-      parameters.encodings[0] = {
-        maxBitrate: 128000 // Set a high bitrate for audio, 128 kbps
-      };
-      sender.setParameters(parameters);
+      if (parameters.encodings && parameters.encodings[0]) {
+        parameters.encodings[0].maxBitrate = 128000;
+        sender.setParameters(parameters);
+      }
     }
   };
 
   const handleUserJoined = useCallback(
     async (remoteId: string) => {
       setRemoteChatToken(remoteId);
-      setPartnerPremium(false); // Reset partner premium status for new connection
-      playSound('match'); // Play match found sound
-      setShowReport(true); // Show report option on match
+      setPartnerPremium(false);
+      playSound('match');
+      setShowReport(true);
       const offer = await peerservice.getOffer();
       socket?.emit("offer", { offer, to: remoteId });
     },
@@ -293,7 +300,6 @@ export default function VideoChat() {
         const answer = await peerservice.getAnswer(offer);
         setAudioBandwidth(peerservice.peer);
         socket?.emit("answer", { answer, to: from });
-        // console.log("Answer created and sent");
         sendStream();
       } else {
         console.warn(
@@ -310,7 +316,6 @@ export default function VideoChat() {
       if (peerservice.peer.signalingState === "have-local-offer") {
         await peerservice.setRemoteDescription(answer);
         sendStream();
-        // console.log("get Answer");
       } else {
         console.warn("Peer not in a proper state to set remote description.");
       }
@@ -332,7 +337,6 @@ export default function VideoChat() {
       if (currentOffer && currentOffer.sdp) {
         const modifiedSDP = modifySDP(currentOffer.sdp);
 
-        // Create a new RTCSessionDescription with the modified SDP
         const modifiedOffer = new RTCSessionDescription({
           type: currentOffer.type,
           sdp: modifiedSDP
@@ -344,27 +348,11 @@ export default function VideoChat() {
           offer: modifiedOffer,
           targetChatToken: remoteChatToken
         });
-
-        // console.log("Negotiation initiated with modified SDP.");
       }
     } else {
       console.warn("Peer is not in a stable state for negotiation.");
     }
   }, [remoteChatToken, socket]);
-
-  // const handleNegotiationNeeded = useCallback(async () => {
-
-  //   if (peerservice.peer.signalingState === "stable") {
-  //     const currentOffer = await peerservice.getOffer();
-  //     socket?.emit("peer:nego:needed", {
-  //       offer: currentOffer,
-  //       to: remoteSocketId,
-  //     });
-  //     console.log("Negotiation initiated.");
-  //   } else {
-  //     console.warn("Peer is not in a stable state for negotiation.");
-  //   }
-  // }, [remoteSocketId, socket]);
 
   const handleNegotiationIncomming = useCallback(
     async ({ offer, from }: Offer) => {
@@ -380,7 +368,6 @@ export default function VideoChat() {
           peerservice.peer.signalingState
         );
       }
-      // console.log("nego:incomming");
     },
     [socket]
   );
@@ -393,7 +380,6 @@ export default function VideoChat() {
       ) {
         await peerservice.setRemoteDescription(answer);
         sendStream();
-        // console.log("Final negotiation step completed.");
       } else if (peerservice.peer.signalingState === "stable") {
         console.log("Connection is stable, no need for further negotiation.");
       } else {
@@ -407,8 +393,6 @@ export default function VideoChat() {
   );
 
   const handleSkip = useCallback(async () => {
-    // console.log("Skipping current user");
-
     peerservice.peer.getTransceivers().forEach((transceiver) => {
       if (transceiver.stop) {
         transceiver.stop();
@@ -427,7 +411,6 @@ export default function VideoChat() {
     peerservice.peer.onnegotiationneeded = null;
 
     if (peerservice.peer.signalingState !== "closed") {
-      // console.log("closed");
       peerservice.peer.close();
     }
     peerservice.initPeer();
@@ -459,8 +442,7 @@ export default function VideoChat() {
 
   useEffect(() => {
     const handleTrackEvent = (event: RTCTrackEvent) => {
-      const [incomingStream] = event.streams; // Get the MediaStream from event.streams
-      // console.log("Received track event:", event.track);
+      const [incomingStream] = event.streams;
       setRemoteStream(incomingStream);
     };
 
@@ -469,10 +451,9 @@ export default function VideoChat() {
     return () => {
       peerservice.peer.removeEventListener("track", handleTrackEvent);
     };
-  }, [isScreenSharing, sendStream, flag]);
+  }, []);
 
   const userDisConnected = useCallback(async () => {
-    // console.log("You've been skipped. Looking for a new user...");
     setFlag(true);
     peerservice.peer.getTransceivers().forEach((transceiver) => {
       if (transceiver.stop) {
@@ -489,13 +470,12 @@ export default function VideoChat() {
     peerservice.peer.onnegotiationneeded = null;
 
     if (peerservice.peer.signalingState !== "closed") {
-      // console.log("closed");
       peerservice.peer.close();
     }
 
     setRemoteStream(null);
     setRemoteChatToken(null);
-    setPartnerPremium(false); // Reset partner premium status
+    setPartnerPremium(false);
 
     peerservice.initPeer();
     setMessagesArray([]);
@@ -512,7 +492,6 @@ export default function VideoChat() {
   useEffect(() => {
     peerservice.peer.onicecandidate = (event) => {
       if (event.candidate) {
-        // console.log("Sending ICE candidate:", event.candidate);
         socket?.emit("ice-candidate", {
           candidate: event.candidate,
           to: remoteChatToken
@@ -528,7 +507,7 @@ export default function VideoChat() {
         peerservice.peer
           .addIceCandidate(candidate)
           .then(() => {
-            // console.log("Added ICE candidate:", candidate);
+            console.log("Added ICE candidate:", candidate);
           })
           .catch((error) => {
             console.error("Error adding ICE candidate:", error);
@@ -549,8 +528,7 @@ export default function VideoChat() {
     socket?.on("peer:nego:final", handleNegotiationFinal);
     socket?.on("partnerDisconnected", userDisConnected);
     
-    // Handle premium status exchange
-    socket?.on("partner:premium:status", ({ isPremium }) => {
+    socket?.on("partner:premium:status", ({ isPremium }: { isPremium: boolean }) => {
       setPartnerPremium(isPremium);
     });
 
@@ -573,7 +551,6 @@ export default function VideoChat() {
     userDisConnected
   ]);
 
-  // Send premium status to partner when connected
   useEffect(() => {
     if (remoteChatToken && socket) {
       socket.emit("send:premium:status", { 
@@ -584,63 +561,51 @@ export default function VideoChat() {
   }, [isPremium, remoteChatToken, socket]);
 
   const handleCleanup = useCallback(() => {
-    // console.log("Cleaning up...");
-
-    // Stop camera stream
     if (myStream) {
       myStream.getTracks().forEach((track) => {
-        // console.log("Stopping track:", track);
-        track.stop(); // Stop each media track (video/audio)
+        track.stop();
       });
-      setMyStream(null); // Clear the state to ensure the stream is stopped
+      setMyStream(null);
     }
 
-    // Stop screen sharing stream
     if (screenStream) {
       screenStream.getTracks().forEach((track) => {
-        // console.log("Stopping screen sharing track:", track);
-        track.stop(); // Stop each screen sharing track
+        track.stop();
       });
       setScreenStream(null);
       setIsScreenSharing(false);
     }
 
-    // Disconnect the socket
     if (socket) {
       socket.disconnect();
     }
 
-    // Close and reset Peer Connection
     if (peerservice.peer.signalingState !== "closed") {
       peerservice.peer.close();
-      peerservice.initPeer(); // Re-initialize the peer connection if needed
+      peerservice.initPeer();
     }
 
     navigate("/");
-    window.location.reload();
   }, [myStream, navigate, screenStream, socket]);
 
-  // Reporting logic
   const handleReport = (reason: string) => {
-    // Save report count in localStorage (for demo, use socket/userId in real app)
     const count = Number(localStorage.getItem(`ajnabicam_reports_${remoteChatToken}`) || 0) + 1;
     localStorage.setItem(`ajnabicam_reports_${remoteChatToken}`, String(count));
     setReportSubmitted(true);
     setShowReport(false);
     setShowReportEnd(false);
-    // If 20 or more reports, suspend for 24h
+    
     if (count >= 20) {
       localStorage.setItem("ajnabicam_suspend_until", String(Date.now() + 24*60*60*1000));
       setSuspended(true);
     }
-    // Show warning if reported (not suspended)
+    
     if (count < 20) {
       alert("You have been reported. Please follow decency guidelines or your account may be suspended.");
     }
     setTimeout(() => setReportSubmitted(false), 2000);
   };
 
-  // Blocking logic
   const handleBlock = () => {
     if (remoteChatToken) {
       let blocked = JSON.parse(localStorage.getItem("ajnabicam_blocked") || "[]");
@@ -654,7 +619,6 @@ export default function VideoChat() {
     }
   };
 
-  // Prevent matching with blocked users (pseudo, backend should enforce)
   useEffect(() => {
     const blocked = JSON.parse(localStorage.getItem("ajnabicam_blocked") || "[]");
     if (blocked.includes(remoteChatToken)) {
@@ -663,7 +627,6 @@ export default function VideoChat() {
     }
   }, [remoteChatToken, handleSkip]);
 
-  // Check for suspension (localStorage, simple demo)
   useEffect(() => {
     const suspendUntil = localStorage.getItem("ajnabicam_suspend_until");
     if (suspendUntil && Date.now() < Number(suspendUntil)) {
@@ -671,7 +634,6 @@ export default function VideoChat() {
     }
   }, []);
 
-  // Show suspension message if needed
   if (suspended) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-white">
@@ -684,41 +646,37 @@ export default function VideoChat() {
     );
   }
 
-  // Native app-like layout
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-br from-rose-100 via-pink-100 to-fuchsia-200 flex flex-col items-center justify-between overflow-y-auto">
       {/* Top Bar */}
       <div className="w-full flex items-center justify-between px-4 pt-4 pb-2 z-20">
         <Button variant="ghost" className="rounded-full p-2 bg-white/70 shadow-md" onClick={handleCleanup}>
-          <StepBack size={22} className="text-rose-400" />
+          <ArrowLeft size={22} className="text-rose-400" />
         </Button>
         <div className="flex-1 flex justify-center">
           <span className="font-bold text-lg text-rose-500 tracking-wide">AjnabiCam</span>
         </div>
-        <div className="w-10" /> {/* Spacer for symmetry */}
+        <div className="w-10" />
       </div>
 
-      {/* Timer chip */}
+      {/* Timer */}
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30">
-        <div className="bg-white/80 px-4 py-1 rounded-full shadow text-rose-500 font-semibold text-sm border border-rose-200">
-          <ChatTimer
-            isPremium={isPremium}
-            isConnected={remoteChatToken !== null}
-            partnerPremium={partnerPremium}
-            onTimeUp={handleTimeUp}
-            onUpgrade={handleUpgrade}
-          />
-        </div>
+        <ChatTimer
+          isPremium={isPremium}
+          isConnected={remoteChatToken !== null}
+          partnerPremium={partnerPremium}
+          onTimeUp={handleTimeUp}
+          onUpgrade={handleUpgrade}
+        />
       </div>
 
-      {/* WhatsApp VC-style Streams area */}
+      {/* Video Streams */}
       <div className="flex-1 flex flex-col items-center justify-center w-full px-2 pb-32 pt-8 relative">
-        {/* Remote (partner) stream large, full area */}
-        <div className="w-full h-[60vh] max-w-lg mx-auto rounded-3xl shadow-2xl bg-black/80 overflow-hidden relative animate-fadein border border-fuchsia-100 flex items-center justify-center">
+        <div className="w-full h-[60vh] max-w-lg mx-auto rounded-3xl shadow-2xl bg-black/80 overflow-hidden relative border border-fuchsia-100 flex items-center justify-center">
           {remoteStream ? (
             isVoiceOnly ? (
               <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-blue-400 to-teal-400">
-                <div className="text-7xl mb-2 animate-pop">�</div>
+                <div className="text-7xl mb-2">🎙️</div>
                 <p className="text-white text-lg font-semibold drop-shadow">Partner's Voice</p>
               </div>
             ) : (
@@ -737,20 +695,10 @@ export default function VideoChat() {
               <p className="text-gray-500 mt-2 text-xs">Waiting for user to connect...</p>
             </div>
           )}
-          {/* My stream as movable PiP */}
+          
+          {/* My stream as PiP */}
           {myStream && !isVoiceOnly && (
-            <div
-              id="my-pip"
-              className="absolute bottom-4 right-4 w-24 h-40 bg-black/80 rounded-xl shadow-lg border-2 border-white cursor-move z-30 flex items-center justify-center"
-              style={{ touchAction: 'none' }}
-              draggable
-              onDragStart={e => {
-                e.dataTransfer.setDragImage(new Image(), 0, 0);
-              }}
-              onTouchStart={e => {
-                e.currentTarget.style.zIndex = '50';
-              }}
-            >
+            <div className="absolute bottom-4 right-4 w-24 h-40 bg-black/80 rounded-xl shadow-lg border-2 border-white z-30 flex items-center justify-center">
               <ReactPlayer
                 className="w-full h-full object-cover rounded-xl"
                 url={myStream}
@@ -762,11 +710,11 @@ export default function VideoChat() {
             </div>
           )}
         </div>
-        {/* (Removed duplicate large myStream view; only PiP remains) */}
-        {/* My voice card if voice only */}
+        
+        {/* Voice only card */}
         {myStream && isVoiceOnly && (
-          <div className="w-full h-32 max-w-lg mx-auto rounded-3xl shadow-2xl bg-gradient-to-br from-purple-400 to-pink-400 overflow-hidden relative animate-fadein border border-rose-100 mt-4 flex flex-col items-center justify-center">
-            <div className="text-6xl mb-2 animate-pop">🎙️</div>
+          <div className="w-full h-32 max-w-lg mx-auto rounded-3xl shadow-2xl bg-gradient-to-br from-purple-400 to-pink-400 overflow-hidden relative border border-rose-100 mt-4 flex flex-col items-center justify-center">
+            <div className="text-6xl mb-2">🎙️</div>
             <p className="text-white text-lg font-semibold drop-shadow">Your Voice</p>
             {isPremium && (
               <div className="flex items-center gap-1 bg-yellow-400 px-2 py-1 rounded-full text-xs font-bold text-white mt-2">
@@ -777,40 +725,59 @@ export default function VideoChat() {
         )}
       </div>
 
-      {/* Floating Controls Bar */}
+      {/* Controls */}
       <div className="fixed bottom-0 left-0 w-full z-40 flex flex-col items-center pb-4">
-        <div className="w-full max-w-md mx-auto flex flex-row justify-between items-center gap-2 bg-white/90 rounded-2xl shadow-2xl px-3 py-2 border border-rose-100 animate-fadein">
-          <Button className="flex-1 mx-1 p-3 bg-rose-500 text-white rounded-xl text-lg font-bold shadow-md" onClick={handleSkip} disabled={remoteChatToken === null}>
-            <StepForward size={22} />
+        <div className="w-full max-w-md mx-auto flex flex-row justify-between items-center gap-2 bg-white/90 rounded-2xl shadow-2xl px-3 py-2 border border-rose-100">
+          <Button 
+            className="flex-1 mx-1 p-3 bg-rose-500 text-white rounded-xl text-lg font-bold shadow-md" 
+            onClick={handleSkip} 
+            disabled={remoteChatToken === null}
+          >
+            <SkipForward size={22} />
             <span className="ml-2">Skip</span>
           </Button>
-          <Button className={`flex-1 mx-1 p-3 rounded-xl text-lg font-bold shadow-md flex items-center justify-center ${isCameraOn ? 'bg-gray-200 text-rose-500' : 'bg-rose-500 text-white'}`} onClick={toggleCamera}>
-            {isCameraOn ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" /></svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" /><line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2" /></svg>
-            )}
+          
+          <Button 
+            className={`flex-1 mx-1 p-3 rounded-xl text-lg font-bold shadow-md flex items-center justify-center ${
+              isCameraOn ? 'bg-gray-200 text-rose-500' : 'bg-rose-500 text-white'
+            }`} 
+            onClick={toggleCamera}
+          >
+            {isCameraOn ? <Video size={22} /> : <VideoOff size={22} />}
           </Button>
-          <Button className={`flex-1 mx-1 p-3 rounded-xl text-lg font-bold shadow-md flex items-center justify-center ${isMicOn ? 'bg-gray-200 text-rose-500' : 'bg-rose-500 text-white'}`} onClick={toggleMic}>
-            {isMicOn ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18v2m0 0a6 6 0 01-6-6v-2a6 6 0 016-6 6 6 0 016 6v2a6 6 0 01-6 6zm0 0v-2" /></svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18v2m0 0a6 6 0 01-6-6v-2a6 6 0 016-6 6 6 0 016 6v2a6 6 0 01-6 6zm0 0v-2" /><line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2" /></svg>
-            )}
+          
+          <Button 
+            className={`flex-1 mx-1 p-3 rounded-xl text-lg font-bold shadow-md flex items-center justify-center ${
+              isMicOn ? 'bg-gray-200 text-rose-500' : 'bg-rose-500 text-white'
+            }`} 
+            onClick={toggleMic}
+          >
+            {isMicOn ? <Mic size={22} /> : <MicOff size={22} />}
           </Button>
-          <Button className="flex-1 mx-1 p-3 bg-fuchsia-500 text-white rounded-xl text-lg font-bold shadow-md" onClick={handleScreenShare}>
+          
+          <Button 
+            className="flex-1 mx-1 p-3 bg-fuchsia-500 text-white rounded-xl text-lg font-bold shadow-md" 
+            onClick={handleScreenShare}
+          >
             <ScreenShare size={22} />
           </Button>
         </div>
+        
         <div className="w-full max-w-md mx-auto flex flex-row gap-2 mt-2">
-          <Button className="flex-1 bg-gray-100 text-gray-700 font-semibold rounded-xl" onClick={() => setShowBlock(true)}>
+          <Button 
+            className="flex-1 bg-gray-100 text-gray-700 font-semibold rounded-xl" 
+            onClick={() => setShowBlock(true)}
+          >
             Block
           </Button>
-          <Button className="flex-1 bg-rose-100 text-rose-700 font-semibold rounded-xl" onClick={() => setShowReport(true)}>
+          <Button 
+            className="flex-1 bg-rose-100 text-rose-700 font-semibold rounded-xl" 
+            onClick={() => setShowReport(true)}
+          >
             Report
           </Button>
         </div>
-        {/* Premium-only Start Chat button */}
+        
         {isPremium && (
           <div className="w-full max-w-md mx-auto mt-2">
             <Button className="w-full py-3 text-base font-bold rounded-xl bg-green-500 text-white shadow-md">
@@ -820,9 +787,7 @@ export default function VideoChat() {
         )}
       </div>
 
-      {/* (Removed type message box for all users) */}
-
-      {/* Modals and Toasts */}
+      {/* Modals */}
       <PremiumPaywall
         isOpen={showPaywall}
         onClose={() => setShowPaywall(false)}
@@ -843,6 +808,8 @@ export default function VideoChat() {
         onClose={() => setShowBlock(false)}
         onBlock={handleBlock}
       />
+      
+      {/* Toast notifications */}
       {reportSubmitted && (
         <div className="fixed bottom-32 left-1/2 -translate-x-1/2 bg-green-100 text-green-700 px-4 py-2 rounded-full shadow-lg z-50">
           Thank you for your report.

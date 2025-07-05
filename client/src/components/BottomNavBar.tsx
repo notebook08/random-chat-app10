@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Home as HomeIcon, MessageCircle, Mic, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -6,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 const iconSize = 18;
 const navItems = [
   { label: "Home", icon: <HomeIcon size={iconSize} />, path: "/" },
-  { label: "Chat", icon: <MessageCircle size={iconSize} />, path: "/chat-page" },
+  { label: "Chat", icon: <MessageCircle size={iconSize} />, path: "/chat" },
   { label: "Voice", icon: <Mic size={iconSize} />, path: "/voice" },
   { label: "Profile", icon: <User size={iconSize} />, path: "/profile" },
 ];

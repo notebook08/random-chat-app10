@@ -8,32 +8,22 @@ import { Crown } from "lucide-react";
 import GenderFilter from "../components/GenderFilter";
 import PremiumPaywall from "../components/PremiumPaywall";
 import BottomNavBar from "../components/BottomNavBar";
+import { usePremium } from "../context/PremiumProvider";
 
-// Banner images for the carousel
 const bannerImages = [
-  '/splash-image.png',
-  'https://placehold.co/800x300/ff69b4/ffffff?text=Premium+Features+Await!',
-  'https://placehold.co/800x300/8b5cf6/ffffff?text=Connect+Instantly+Worldwide',
-  'https://placehold.co/800x300/10b981/ffffff?text=Safe+%26+Secure+Chats'
+  'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop',
+  'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop',
+  'https://images.pexels.com/photos/3184293/pexels-photo-3184293.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop',
+  'https://images.pexels.com/photos/3184294/pexels-photo-3184294.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop'
 ];
 
 export default function Home() {
   const { socket } = useSocket();
   const navigate = useNavigate();
+  const { isPremium, setPremium } = usePremium();
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-
-  // Premium State
-  const [isPremium, setIsPremium] = useState(() => {
-    const trial = localStorage.getItem("ajnabicam_premium_trial");
-    const expiry = localStorage.getItem("ajnabicam_premium_trial_expiry");
-    if (trial === "true" && expiry && Date.now() < Number(expiry)) {
-      return true;
-    }
-    return false;
-  });
   const [showPaywall, setShowPaywall] = useState(false);
 
-  // Auto-scroll banner every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBannerIndex((prev) => (prev + 1) % bannerImages.length);
@@ -45,7 +35,7 @@ export default function Home() {
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       playSound('join');
-      navigate("/chat");
+      navigate("/video-chat");
     },
     [navigate]
   );
@@ -54,9 +44,18 @@ export default function Home() {
     setShowPaywall(true);
   };
 
-  const handlePremiumPurchase = () => {
-    setIsPremium(true);
+  const handlePremiumPurchase = (plan: string) => {
+    const now = new Date();
+    const expiry = new Date(now);
+    if (plan === "weekly") {
+      expiry.setDate(now.getDate() + 7);
+    } else {
+      expiry.setMonth(now.getMonth() + 1);
+    }
+    
+    setPremium(true, expiry);
     setShowPaywall(false);
+    alert(`🎉 Welcome to Premium! Your ${plan} subscription is now active!`);
   };
 
   return (
@@ -65,7 +64,7 @@ export default function Home() {
         <title>AjnabiCam - Random Video Chat - Live chat with ajnabis</title>
       </Helmet>
       <main className="flex flex-col min-h-screen w-full bg-gradient-to-br from-rose-50 to-pink-100 relative pb-20">
-        {/* Header with App Name */}
+        {/* Header */}
         <header className="w-full flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm shadow-sm">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
@@ -130,14 +129,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Enhanced Gender Filter */}
+          {/* Gender Filter */}
           <div className="w-full max-w-md mb-6">
             <GenderFilter
               isPremium={isPremium}
               onGenderSelect={(gender: string) => {
-                if (gender === "male" || gender === "female") {
-                  // Add logic if needed
-                }
+                console.log("Selected gender:", gender);
               }}
               onUpgrade={handleUpgrade}
             />

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
@@ -13,7 +12,7 @@ interface ChatTimerProps {
 }
 
 export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTimeUp, onUpgrade }: ChatTimerProps) {
-  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [isActive, setIsActive] = useState(false);
   const hasPremiumAccess = isPremium || partnerPremium;
 
@@ -21,7 +20,7 @@ export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTi
     if (isConnected) {
       if (!hasPremiumAccess) {
         setIsActive(true);
-        setTimeLeft(15 * 60); // Reset to 15 minutes for new session
+        setTimeLeft(15 * 60);
       } else {
         setIsActive(false);
       }
@@ -58,9 +57,9 @@ export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTi
   };
 
   const getTimeColor = () => {
-    if (timeLeft > 300) return "text-green-600"; // > 5 minutes
-    if (timeLeft > 60) return "text-yellow-600"; // > 1 minute
-    return "text-red-600"; // < 1 minute
+    if (timeLeft > 300) return "text-green-600";
+    if (timeLeft > 60) return "text-yellow-600";
+    return "text-red-600";
   };
 
   if (!isConnected) return null;
@@ -104,7 +103,7 @@ export default function ChatTimer({ isPremium, isConnected, partnerPremium, onTi
               />
             </div>
             
-            {timeLeft < 300 && ( // Show upgrade prompt when < 5 minutes left
+            {timeLeft < 300 && (
               <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg text-center">
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                   ⏰ Continue this amazing conversation! Get Premium for unlimited time with this person.

@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useState, useEffect } from "react";
 import { Socket } from 'socket.io-client';
-import io from 'socket.io-client'; // Import io
+import io from 'socket.io-client';
 
 interface ISocketContext {
     socket: Socket | null;
@@ -9,7 +9,6 @@ interface ISocketContext {
 
 const SocketContext = createContext<ISocketContext | null>(null);
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useSocket = () => {
     const context = useContext(SocketContext);
     if(!context){
@@ -22,14 +21,29 @@ export const SocketProvider = ({children} : {children: ReactNode}) => {
     const [socket, setSocket] = useState<Socket | null>(null);
 
     useEffect(() => {
-        // Only initialize socket when needed
         if (!socket) {
             const socketUrl = import.meta.env.VITE_API_SERVER_URL || 
                 `http://${window.location.hostname.replace(/--\d+--/, '--80--')}`;
+            
             const newSocket = io(socketUrl, {
                 transports: ['websocket', 'polling'],
-                secure: false
+                secure: false,
+                timeout: 20000,
+                forceNew: true
             });
+
+            newSocket.on('connect', () => {
+                console.log('Socket connected:', newSocket.id);
+            });
+
+            newSocket.on('disconnect', () => {
+                console.log('Socket disconnected');
+            });
+
+            newSocket.on('connect_error', (error) => {
+                console.error('Socket connection error:', error);
+            });
+
             setSocket(newSocket);
 
             return () => {

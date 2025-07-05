@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/ui/button';
+import { ArrowLeft, MoreVertical, Send } from 'lucide-react';
 
 const initialChats = [
   {
@@ -7,7 +10,7 @@ const initialChats = [
     lastMessage: 'What\'s up? How are you doing today?',
     time: '10:24 AM',
     unreadCount: 3,
-    avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
+    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
   },
   {
     id: 2,
@@ -15,7 +18,7 @@ const initialChats = [
     lastMessage: 'Haha 😂 That was so funny!',
     time: 'Yesterday',
     unreadCount: 0,
-    avatar: 'https://randomuser.me/api/portraits/women/65.jpg',
+    avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
   },
   {
     id: 3,
@@ -23,7 +26,7 @@ const initialChats = [
     lastMessage: 'Let\'s connect again soon 💕',
     time: 'Monday',
     unreadCount: 1,
-    avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+    avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
   },
   {
     id: 4,
@@ -31,7 +34,7 @@ const initialChats = [
     lastMessage: 'Nice talking to you!',
     time: 'Tuesday',
     unreadCount: 2,
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+    avatar: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop',
   },
 ];
 
@@ -83,7 +86,7 @@ const PersonalChat = ({
         text: input,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
-      setMessages([...messages, newMsg]);
+      setMessages(prev => [...prev, newMsg]);
       setInput('');
 
       const updatedChat = {
@@ -98,16 +101,35 @@ const PersonalChat = ({
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSend();
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto h-screen bg-gradient-to-br from-rose-50 to-pink-100 shadow-xl overflow-hidden flex flex-col">
       {/* Enhanced Header */}
       <div className="p-4 bg-gradient-to-r from-rose-500 to-pink-600 flex items-center shadow-lg">
-        <button onClick={onBack} className="mr-3 text-white font-bold text-xl hover:scale-110 transition-transform">&larr;</button>
-        <img src={chat.avatar} alt={chat.name} className="w-12 h-12 rounded-full object-cover mr-3 border-2 border-white shadow-md" />
-        <div>
+        <button 
+          onClick={onBack} 
+          className="mr-3 text-white hover:scale-110 transition-transform"
+          aria-label="Go back"
+        >
+          <ArrowLeft size={24} />
+        </button>
+        <img 
+          src={chat.avatar} 
+          alt={`${chat.name} avatar`} 
+          className="w-12 h-12 rounded-full object-cover mr-3 border-2 border-white shadow-md" 
+        />
+        <div className="flex-1">
           <span className="font-bold text-white text-lg block">{chat.name}</span>
           <span className="text-rose-100 text-xs">Online</span>
         </div>
+        <button className="text-white hover:scale-110 transition-transform">
+          <MoreVertical size={20} />
+        </button>
       </div>
 
       {/* Messages */}
@@ -140,16 +162,15 @@ const PersonalChat = ({
           placeholder="Type a message..."
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter') handleSend();
-          }}
+          onKeyPress={handleKeyPress}
         />
-        <button
+        <Button
           className="ml-3 px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
           onClick={handleSend}
+          disabled={!input.trim()}
         >
-          Send
-        </button>
+          <Send size={16} />
+        </Button>
       </div>
     </div>
   );
@@ -166,16 +187,10 @@ const ChatPageContent = ({
 }) => {
   const [search, setSearch] = useState('');
   const [longPressedChatId, setLongPressedChatId] = useState<number | null>(null);
-  let longPressTimer: NodeJS.Timeout;
+  const navigate = useNavigate();
 
-  const handleMouseDown = (chatId: number) => {
-    longPressTimer = setTimeout(() => {
-      setLongPressedChatId(chatId);
-    }, 600);
-  };
-
-  const handleMouseUp = () => {
-    clearTimeout(longPressTimer);
+  const handleLongPress = (chatId: number) => {
+    setLongPressedChatId(chatId);
   };
 
   const handleDelete = (chatId: number) => {
@@ -194,7 +209,16 @@ const ChatPageContent = ({
       {/* Enhanced Header */}
       <div className="p-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Chats</h1>
+          <div className="flex items-center">
+            <button 
+              onClick={() => navigate('/')} 
+              className="mr-3 hover:scale-110 transition-transform"
+              aria-label="Go to home"
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <h1 className="text-xl font-bold">Chats</h1>
+          </div>
           {totalUnreadCount > 0 && (
             <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
               <span className="text-sm font-semibold">{totalUnreadCount} new</span>
@@ -224,16 +248,15 @@ const ChatPageContent = ({
               onClick={() => {
                 if (longPressedChatId !== chat.id) onChatClick(chat);
               }}
-              onMouseDown={() => handleMouseDown(chat.id)}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onTouchStart={() => handleMouseDown(chat.id)}
-              onTouchEnd={handleMouseUp}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                handleLongPress(chat.id);
+              }}
             >
               <div className="relative">
                 <img
                   src={chat.avatar}
-                  alt={chat.name}
+                  alt={`${chat.name} avatar`}
                   className="w-14 h-14 rounded-full object-cover border-2 border-rose-200 shadow-sm"
                 />
                 {chat.unreadCount > 0 && (
@@ -257,24 +280,26 @@ const ChatPageContent = ({
 
               {longPressedChatId === chat.id && (
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex gap-2">
-                  <button
-                    className="bg-red-500 text-white px-3 py-2 rounded-lg shadow-md font-semibold text-sm"
+                  <Button
+                    size="sm"
+                    variant="destructive"
                     onClick={e => {
                       e.stopPropagation();
                       handleDelete(chat.id);
                     }}
                   >
                     Delete
-                  </button>
-                  <button
-                    className="bg-gray-300 text-gray-700 px-3 py-2 rounded-lg shadow-md font-semibold text-sm"
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={e => {
                       e.stopPropagation();
                       setLongPressedChatId(null);
                     }}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

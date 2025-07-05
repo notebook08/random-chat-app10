@@ -10,7 +10,7 @@ interface MessageProps{
     setMessagesArray: React.Dispatch<React.SetStateAction<Array<{ sender: string; message: string }>>>;
 }
 
-interface RecievedMessageProps {
+interface ReceivedMessageProps {
     message: string;
     from: string;
 }
@@ -20,7 +20,7 @@ export default function Messages({remoteChatToken, messagesArray, setMessagesArr
     const [message, setMessage] = useState<string>('');
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLInputElement>(null); // Ref for input to set focus
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,73 +31,64 @@ export default function Messages({remoteChatToken, messagesArray, setMessagesArr
     }, [messagesArray]);
 
     const handleSendMessage = () => {
-        // Prevent sending empty messages or if remoteChatToken is null
         if (!message.trim() || !remoteChatToken) return;
 
-        // Add message to the messagesArray state with 'You' as the sender
         setMessagesArray((prev) => [...prev, {sender: 'You', message: message.trim()}]);
-
-        // Clear message input after sending
         setMessage('');
         
-        // Emit the message to the socket
         socket?.emit("send:message", {message: message.trim(), targetChatToken: remoteChatToken});
-
-        // Set focus back to the input field for easier typing (FIX #1)
         inputRef.current?.focus();
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        // Send message when "Enter" key is pressed
         if (e.key === "Enter") {
           handleSendMessage();
         }
     };
 
-    const handleMessageRecieved = useCallback(({message}: RecievedMessageProps) => {
-        // Add received message to the state array with 'Stranger' as the sender
+    const handleMessageReceived = useCallback(({message}: ReceivedMessageProps) => {
         setMessagesArray((prev) => [...prev, {sender: 'Stranger', message}])
     }, [setMessagesArray]);
 
     useEffect(() => {
-        socket?.on("message:recieved", handleMessageRecieved);
+        socket?.on("message:recieved", handleMessageReceived);
 
         return () => {
-            socket?.off("message:recieved", handleMessageRecieved);
+            socket?.off("message:recieved", handleMessageReceived);
         }
-    }, [handleMessageRecieved, socket]);
+    }, [handleMessageReceived, socket]);
 
     return (
         <div className="flex flex-1 flex-col h-full">
-
             {/* Messages Area */}
             <div className="h-full overflow-y-auto p-4 bg-gray-200 dark:bg-gray-900 scrollbar-hide">
                 {messagesArray.map((msg, ind) => (
                     <div key={ind} className="mb-2">
-                        <strong className={`${msg.sender === 'You' ? 'text-green-600' : 'text-red-500'}`}>{msg.sender}:</strong> {msg.message}
+                        <strong className={`${msg.sender === 'You' ? 'text-green-600' : 'text-red-500'}`}>
+                            {msg.sender}:
+                        </strong> {msg.message}
                     </div>
                 ))}
-                {/* Invisible div to scroll into view when new messages are added */}
                 <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area */}
             <div className="sticky bottom-0 left-0 w-full flex gap-2 border-t border-gray-200 dark:border-gray-700 p-4">
                 <Input 
-                    ref={inputRef} // Assign input ref to control focus (FIX #1)
+                    ref={inputRef}
                     placeholder="Type a message..." 
                     value={message} 
                     onChange={(e) => setMessage(e.target.value)} 
                     onKeyDown={handleKeyDown}
-                    aria-label="Message input" // Add aria-label for accessibility (FIX #3)
-                    disabled={!remoteChatToken} // Disable input when no remoteChatToken (FIX #4)
+                    aria-label="Message input"
+                    disabled={!remoteChatToken}
                     className="flex-1 bg-gray-200 dark:bg-gray-900"
                 />
                 <Button 
                     className="gap-2" 
                     onClick={handleSendMessage} 
-                    disabled={!remoteChatToken || !message.trim()} // Disable if no message or no connection
-                    aria-label="Send message" // Add aria-label for accessibility (FIX #3)
+                    disabled={!remoteChatToken || !message.trim()}
+                    aria-label="Send message"
                 >
                     <Send size={18} /> Send
                 </Button>

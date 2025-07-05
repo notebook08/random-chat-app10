@@ -34,31 +34,23 @@ let waitingUsers: User[] = [];
 const userPairs: Record<string, string> = {};
 const userProfiles: Record<string, User> = {};
 
-const matchUser = (socket: any, userProfile: User) => {
+const matchUser = (socket: Socket, userProfile: User) => {
     if(!socket.id) return;
 
-    // Find a compatible user in waiting list
     const compatibleUserIndex = waitingUsers.findIndex(waitingUser => {
-        // Basic matching - if neither has gender filter, they can match
         if (!userProfile.genderFilter || userProfile.genderFilter === "any") {
             if (!waitingUser.genderFilter || waitingUser.genderFilter === "any") {
                 return true;
             }
         }
-
-        // If one has premium gender filter, check compatibility
-        // For demo purposes, we'll just match any users
-        // In real implementation, you'd need to store user gender info
         return true;
     });
 
     if (compatibleUserIndex !== -1) {
         const waitingUser = waitingUsers[compatibleUserIndex];
 
-        // Remove from waiting list
         waitingUsers.splice(compatibleUserIndex, 1);
 
-        // Create pair
         userPairs[socket.id] = waitingUser.socketId;
         userPairs[waitingUser.socketId] = socket.id;
 
@@ -66,16 +58,14 @@ const matchUser = (socket: any, userProfile: User) => {
 
         console.log(`Matched ${socket.id} with ${waitingUser.socketId}`);
     } else {
-        // Add to waiting list
         waitingUsers.push(userProfile);
         console.log(`${socket.id} is waiting for pair`);
     }
 }
 
-io.on('connection', (socket) => {
+io.on('connection', (socket: Socket) => {
     console.log(`Socket connected ${socket.id}`);
 
-    // Handle user profile setup
     socket.on("user:profile", (profile: { isPremium?: boolean; genderFilter?: string; voiceOnly?: boolean }) => {
         const userProfile: User = {
             socketId: socket.id,
@@ -89,7 +79,6 @@ io.on('connection', (socket) => {
         matchUser(socket, userProfile);
     });
 
-    // Default matching for users without profile
     const defaultProfile: User = {
         socketId: socket.id,
         isPremium: false,
@@ -100,31 +89,31 @@ io.on('connection', (socket) => {
     userProfiles[socket.id] = defaultProfile;
     matchUser(socket, defaultProfile);
 
-    socket.on("offer", ({offer, to}) => {
+    socket.on("offer", ({offer, to}: {offer: RTCSessionDescriptionInit, to: string}) => {
         io.to(to).emit("offer", {offer, from: socket.id});
     });
 
-    socket.on("answer", ({answer, to}) => {
+    socket.on("answer", ({answer, to}: {answer: RTCSessionDescriptionInit, to: string}) => {
         io.to(to).emit("answer", {answer, from: socket.id});
     })
 
-    socket.on("peer:nego:needed", ({offer, to}) => {
-        io.to(to).emit("peer:nego:needed", { offer, from: socket.id });
+    socket.on("peer:nego:needed", ({offer, targetChatToken}: {offer: RTCSessionDescriptionInit, targetChatToken: string}) => {
+        io.to(targetChatToken).emit("peer:nego:needed", { offer, from: socket.id });
     });
 
-    socket.on("peer:nego:done", ({answer, to}) => {
+    socket.on("peer:nego:done", ({answer, to}: {answer: RTCSessionDescriptionInit, to: string}) => {
         io.to(to).emit("peer:nego:final", {answer, to: socket.id});
     });
 
-    socket.on("ice-candidate", ({candidate, targetChatToken}) => {
-        io.to(targetChatToken).emit("ice-candidate", {candidate, sourceChatToken: socket.id});
+    socket.on("ice-candidate", ({candidate, to}: {candidate: RTCIceCandidate, to: string}) => {
+        io.to(to).emit("ice-candidate", {candidate, sourceChatToken: socket.id});
     });
 
-    socket.on("send:message", ({message, targetChatToken}) => {
+    socket.on("send:message", ({message, targetChatToken}: {message: string, targetChatToken: string}) => {
         io.to(targetChatToken).emit("message:recieved", {message, sourceChatToken: socket.id});
     });
 
-    socket.on("send:premium:status", ({isPremium, targetChatToken}) => {
+    socket.on("send:premium:status", ({isPremium, targetChatToken}: {isPremium: boolean, targetChatToken: string}) => {
         io.to(targetChatToken).emit("partner:premium:status", {isPremium, sourceChatToken: socket.id});
     });
 
@@ -136,7 +125,6 @@ io.on('connection', (socket) => {
             delete userPairs[socket.id];
             delete userPairs[partnerId];
 
-            // Re-match both users
             const partnerSocket = io.sockets.sockets.get(partnerId);
             if (partnerSocket) {
                 const partnerProfile = userProfiles[partnerId];
@@ -146,7 +134,6 @@ io.on('connection', (socket) => {
             }
         }
 
-        // Re-match current user
         const currentProfile = userProfiles[socket.id];
         if (currentProfile) {
             matchUser(socket, currentProfile);
@@ -170,11 +157,10 @@ io.on('connection', (socket) => {
             }
         }
 
-        // Remove from waiting list
         waitingUsers = waitingUsers.filter(user => user.socketId !== socket.id);
-
-        // Clean up user profile
         delete userProfiles[socket.id];
+        
+        console.log(`Socket disconnected ${socket.id}`);
     })
 })
 
