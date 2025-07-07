@@ -83,9 +83,9 @@ export default function Home() {
       </Helmet>
       <main className="flex flex-col min-h-screen w-full max-w-md mx-auto bg-white relative pb-20">
         {/* Enhanced Header */}
-        <header className="w-full bg-white shadow-sm px-4 py-4 border-b border-pink-100">
+        <header className="w-full bg-gradient-to-r from-rose-500 to-pink-600 shadow-sm px-6 py-6 border-b border-pink-100">
           <div className="flex items-center justify-between">
-            {/* Premium Badge and Coin Button */}
+            {/* Premium Badge */}
             <div className="flex items-center gap-3">
               {isPremium && (
                 <div className="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-500 px-3 py-1 rounded-full">
@@ -117,20 +117,20 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="flex-1 flex flex-col px-4 py-4">
+        <div className="flex-1 flex flex-col px-6 py-6">
           {/* App Name aligned with banner */}
           <div className="mb-4">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
               {t('app.name')}
             </h1>
-            <p className="text-gray-600 text-sm font-medium">
+            <p className="text-rose-100 text-sm font-medium">
               {t('app.tagline')}
             </p>
           </div>
 
-          {/* Banner Carousel */}
+          {/* Enhanced Banner Carousel */}
           <div className="w-full mb-6 relative">
-            <div className="overflow-hidden rounded-2xl shadow-lg">
+            <div className="overflow-hidden rounded-2xl shadow-xl">
               <div
                 className="flex transition-transform duration-700 ease-in-out"
                 style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
@@ -140,47 +140,47 @@ export default function Home() {
                     <img
                       src={image}
                       alt={`Banner ${index + 1}`}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-48 object-cover"
                     />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Carousel Dots - Made much smaller */}
-            <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1">
+            {/* Enhanced Carousel Dots */}
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
               {bannerImages.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentBannerIndex(index)}
-                  className={`h-0.5 w-0.5 rounded-full transition-all duration-300 ${
-                    currentBannerIndex === index ? 'bg-white w-2' : 'bg-white/50'
+                  className={`h-2 w-2 rounded-full transition-all duration-300 ${
+                    currentBannerIndex === index ? 'bg-white w-6' : 'bg-rose-200'
                   }`}
                 />
               ))}
             </div>
           </div>
 
-          {/* Features Grid */}
+          {/* Enhanced Features Grid */}
           <div className="w-full grid grid-cols-3 gap-3 mb-6">
-            <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center shadow-sm border border-pink-100">
-              <span className="text-2xl mb-2 block">🎥</span>
-              <div className="font-semibold text-sm text-rose-700">{t('home.features.hd')}</div>
+            <div className="bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl p-4 text-center shadow-sm border border-rose-200 hover:scale-105 hover:shadow-lg transition-all duration-200">
+              <span className="text-3xl mb-2 block">🎥</span>
+              <div className="font-bold text-sm text-rose-700">{t('home.features.hd')}</div>
               <div className="text-xs text-rose-400">Crystal clear</div>
             </div>
-            <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center shadow-sm border border-pink-100">
-              <span className="text-2xl mb-2 block">🔒</span>
-              <div className="font-semibold text-sm text-rose-700">{t('home.features.secure')}</div>
+            <div className="bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl p-4 text-center shadow-sm border border-rose-200 hover:scale-105 hover:shadow-lg transition-all duration-200">
+              <span className="text-3xl mb-2 block">🔒</span>
+              <div className="font-bold text-sm text-rose-700">{t('home.features.secure')}</div>
               <div className="text-xs text-rose-400">Encrypted</div>
             </div>
-            <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center shadow-sm border border-pink-100">
-              <span className="text-2xl mb-2 block">⚡</span>
-              <div className="font-semibold text-sm text-rose-700">{t('home.features.instant')}</div>
+            <div className="bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl p-4 text-center shadow-sm border border-rose-200 hover:scale-105 hover:shadow-lg transition-all duration-200">
+              <span className="text-3xl mb-2 block">⚡</span>
+              <div className="font-bold text-sm text-rose-700">{t('home.features.instant')}</div>
               <div className="text-xs text-rose-400">Connect now</div>
             </div>
           </div>
 
-          {/* Gender Filter */}
+          {/* Enhanced Gender Filter */}
           <div className="w-full mb-6">
             <GenderFilter
               isPremium={isPremium}
@@ -191,10 +191,10 @@ export default function Home() {
             />
           </div>
 
-          {/* Main Action Button */}
+          {/* Enhanced Main Action Button */}
           <div className="w-full">
             <Button
-              className="w-full py-4 text-lg font-bold rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+              className="w-full py-5 text-xl font-bold rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
               onClick={handleStartCall}
             >
               🚀 {t('home.start')}

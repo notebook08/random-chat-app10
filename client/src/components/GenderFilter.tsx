@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -48,7 +47,7 @@ export default function GenderFilter({ isPremium, onGenderSelect, onUpgrade }: G
                 variant={selectedGender === option.id ? "default" : "outline"}
                 className={`justify-start h-auto p-4 rounded-xl transition-all duration-200 ${
                   selectedGender === option.id 
-                    ? "bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-md transform scale-105" 
+                    ? "bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg transform scale-105 border-rose-500" 
                     : "hover:bg-rose-50 border-rose-200"
                 } ${isLocked ? "opacity-60" : ""}`}
                 onClick={() => handleGenderChange(option.id)}
@@ -69,7 +68,7 @@ export default function GenderFilter({ isPremium, onGenderSelect, onUpgrade }: G
         </div>
         
         {!isPremium && (
-          <div className="mt-4 p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl text-center border border-purple-200">
+          <div className="mt-4 p-4 bg-gradient-to-r from-purple-200 to-pink-200 rounded-xl text-center border border-purple-300">
             <p className="text-sm text-purple-700 mb-3 font-medium">
               🎯 Unlock gender filtering with Premium!
             </p>
