@@ -15,6 +15,7 @@ import ProfilePage from "./screens/ProfilePage";
 import UserSetup from "./screens/UserSetup";
 import PersonalChat from "./screens/PersonalChat";
 import FriendsPage from "./screens/FriendsPage";
+import AIChatbotPage from "./screens/AIChatbotPage";
 
 import { useNavigate } from "react-router-dom";
 
@@ -71,6 +72,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/refer" element={<ReferToUnlock />} />
         <Route path="/referral-code" element={<ReferralCodeScreen />} />
+        <Route path="/ai-chatbot" element={<AIChatbotPage />} />
       </Routes>
     </div>
   );
