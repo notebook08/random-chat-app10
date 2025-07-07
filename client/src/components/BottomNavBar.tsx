@@ -1,19 +1,22 @@
 import React from "react";
 import { Home as HomeIcon, MessageCircle, Mic, User, Users } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useLanguage } from "../context/LanguageProvider";
 
 const iconSize = 18;
-const navItems = [
-  { label: "Home", icon: <HomeIcon size={iconSize} />, path: "/" },
-  { label: "Chat", icon: <MessageCircle size={iconSize} />, path: "/chat" },
-  { label: "Friends", icon: <Users size={iconSize} />, path: "/friends" },
-  { label: "Voice", icon: <Mic size={iconSize} />, path: "/voice" },
-  { label: "Profile", icon: <User size={iconSize} />, path: "/profile" },
-];
 
 export default function BottomNavBar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { label: t('nav.home'), icon: <HomeIcon size={iconSize} />, path: "/" },
+    { label: t('nav.chat'), icon: <MessageCircle size={iconSize} />, path: "/chat" },
+    { label: t('nav.friends'), icon: <Users size={iconSize} />, path: "/friends" },
+    { label: t('nav.voice'), icon: <Mic size={iconSize} />, path: "/voice" },
+    { label: t('nav.profile'), icon: <User size={iconSize} />, path: "/profile" },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-pink-100 flex justify-around items-center h-16 shadow-lg w-full max-w-md mx-auto">

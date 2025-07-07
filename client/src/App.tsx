@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 import VideoChat from "./screens/VideoChat";
 import SplashScreen from "./components/SplashScreen";
+import OnboardingScreen from "./screens/OnboardingScreen";
 import ReferToUnlock from "./screens/ReferToUnlock";
 import ReferralCodeScreen from "./screens/ReferralCode";
 import GenderSelect from "./screens/GenderSelect";
@@ -23,15 +24,24 @@ function App() {
 
   useEffect(() => {
     if (!showSplash) {
-      // Check if user has completed setup
+      // Check if user has completed onboarding
       const userData = localStorage.getItem("ajnabicam_user_data");
       const firstOpen = localStorage.getItem("ajnabicam_first_open");
 
       if (!firstOpen) {
+        // First time opening the app
         localStorage.setItem("ajnabicam_first_open", "true");
-        navigate("/user-setup", { replace: true });
-      } else if (!userData || !JSON.parse(userData).setupComplete) {
-        navigate("/user-setup", { replace: true });
+        navigate("/onboarding", { replace: true });
+      } else if (!userData) {
+        // User has opened before but no data saved
+        navigate("/onboarding", { replace: true });
+      } else {
+        const parsedData = JSON.parse(userData);
+        if (!parsedData.onboardingComplete) {
+          // User data exists but onboarding not complete
+          navigate("/onboarding", { replace: true });
+        }
+        // If onboarding is complete, stay on current route or go to home
       }
     }
   }, [showSplash, navigate]);
@@ -48,6 +58,7 @@ function App() {
     <div>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/onboarding" element={<OnboardingScreen />} />
         <Route path="/user-setup" element={<UserSetup />} />
         <Route path="/premium-trial" element={<ReferToUnlock />} />
         <Route path="/home" element={<HomePage />} />

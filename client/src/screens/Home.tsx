@@ -11,6 +11,7 @@ import TreasureChest from "../components/TreasureChest";
 import BottomNavBar from "../components/BottomNavBar";
 import { usePremium } from "../context/PremiumProvider";
 import { useCoin } from "../context/CoinProvider";
+import { useLanguage } from "../context/LanguageProvider";
 
 const bannerImages = [
   'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800&h=200&fit=crop',
@@ -24,6 +25,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { isPremium, setPremium } = usePremium();
   const { coins } = useCoin();
+  const { t } = useLanguage();
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showTreasureChest, setShowTreasureChest] = useState(false);
@@ -73,7 +75,7 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>AjnabiCam - Random Video Chat - Live chat with ajnabis</title>
+        <title>{t('app.name')} - Random Video Chat - Live chat with ajnabis</title>
       </Helmet>
       <main className="flex flex-col min-h-screen w-full max-w-md mx-auto bg-white relative pb-20">
         {/* Enhanced Header */}
@@ -103,10 +105,10 @@ export default function Home() {
           {/* App Name aligned with banner */}
           <div className="mb-4">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
-              AjnabiCam
+              {t('app.name')}
             </h1>
             <p className="text-gray-600 text-sm font-medium">
-              Connect with strangers instantly
+              {t('app.tagline')}
             </p>
           </div>
 
@@ -147,17 +149,17 @@ export default function Home() {
           <div className="w-full grid grid-cols-3 gap-3 mb-6">
             <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center shadow-sm border border-pink-100">
               <span className="text-2xl mb-2 block">🎥</span>
-              <div className="font-semibold text-sm text-rose-700">HD Video</div>
+              <div className="font-semibold text-sm text-rose-700">{t('home.features.hd')}</div>
               <div className="text-xs text-rose-400">Crystal clear</div>
             </div>
             <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center shadow-sm border border-pink-100">
               <span className="text-2xl mb-2 block">🔒</span>
-              <div className="font-semibold text-sm text-rose-700">Secure</div>
+              <div className="font-semibold text-sm text-rose-700">{t('home.features.secure')}</div>
               <div className="text-xs text-rose-400">Encrypted</div>
             </div>
             <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center shadow-sm border border-pink-100">
               <span className="text-2xl mb-2 block">⚡</span>
-              <div className="font-semibold text-sm text-rose-700">Instant</div>
+              <div className="font-semibold text-sm text-rose-700">{t('home.features.instant')}</div>
               <div className="text-xs text-rose-400">Connect now</div>
             </div>
           </div>
@@ -179,12 +181,12 @@ export default function Home() {
               className="w-full py-4 text-lg font-bold rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
               onClick={handleStartCall}
             >
-              🚀 Milo Abhi!
+              🚀 {t('home.start')}
             </Button>
           </div>
 
           <div className="text-xs text-center text-rose-400 mt-6 px-4">
-            By using AjnabiCam, you agree to our Terms of Service and Privacy Policy.
+            By using {t('app.name')}, you agree to our Terms of Service and Privacy Policy.
           </div>
         </div>
 
