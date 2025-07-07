@@ -4,10 +4,13 @@ import http from 'http';
 import dotenv from 'dotenv';
 import cors from 'cors'; 
 
-const app = express();
-const server = http.createServer(app);
+// Load environment variables first
 dotenv.config();
 
+const app = express();
+const server = http.createServer(app);
+
+// Enhanced CORS configuration
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST'],
@@ -19,7 +22,8 @@ const io = new Server(server, {
         origin: '*',
         methods: ['GET', 'POST']
     },
-    transports: ['websocket', 'polling']
+    transports: ['websocket', 'polling'],
+    allowEIO3: true
 });
 
 interface User {
@@ -198,8 +202,34 @@ app.get('/', (req, res) => {
     res.send("Server is running...")
 })
 
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        connectedSockets: io.engine.clientsCount,
+        waitingUsers: waitingUsers.length
+    });
+})
+
 const PORT = process.env.PORT || 8000;
 
+// Enhanced error handling for server startup
 server.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`✅ Server is running on port ${PORT}`);
+    console.log(`🌐 Health check available at http://localhost:${PORT}/health`);
+    console.log(`🔌 Socket.IO server ready for connections`);
+}).on('error', (err) => {
+    console.error('❌ Server failed to start:', err);
+    process.exit(1);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception:', err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
 });
