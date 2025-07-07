@@ -1,5 +1,5 @@
 import React from "react";
-import { Home as HomeIcon, MessageCircle, Mic, User, Users } from "lucide-react";
+import { Home as HomeIcon, MessageCircle, Mic, User, Users, Bot } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "../context/LanguageProvider";
 
@@ -13,6 +13,7 @@ export default function BottomNavBar() {
   const navItems = [
     { label: t('nav.home'), icon: <HomeIcon size={iconSize} />, path: "/" },
     { label: t('nav.chat'), icon: <MessageCircle size={iconSize} />, path: "/chat" },
+    { label: "AI Chat", icon: <Bot size={iconSize} />, path: "/ai-chatbot" },
     { label: t('nav.friends'), icon: <Users size={iconSize} />, path: "/friends" },
     { label: t('nav.voice'), icon: <Mic size={iconSize} />, path: "/voice" },
     { label: t('nav.profile'), icon: <User size={iconSize} />, path: "/profile" },
