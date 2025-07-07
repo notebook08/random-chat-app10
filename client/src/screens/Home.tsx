@@ -4,7 +4,7 @@ import { playSound } from "../lib/audio";
 import { useSocket } from "../context/SocketProvider";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Crown, Coins } from "lucide-react";
+import { Crown, Coins, Mic } from "lucide-react";
 import GenderFilter from "../components/GenderFilter";
 import PremiumPaywall from "../components/PremiumPaywall";
 import TreasureChest from "../components/TreasureChest";
@@ -54,6 +54,10 @@ export default function Home() {
     [navigate, socket, isPremium]
   );
 
+  const handleVoiceChat = useCallback(() => {
+    navigate("/voice");
+  }, [navigate]);
+
   const handleUpgrade = () => {
     setShowPaywall(true);
   };
@@ -91,13 +95,25 @@ export default function Home() {
               )}
             </div>
             
-            <Button
-              onClick={() => setShowTreasureChest(true)}
-              className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-4 py-2 rounded-full shadow-md transform hover:scale-105 transition-all duration-200"
-            >
-              <Coins className="h-4 w-4 mr-2" />
-              {coins}
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* Voice Chat Button */}
+              <Button
+                onClick={handleVoiceChat}
+                className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold px-3 py-2 rounded-full shadow-md transform hover:scale-105 transition-all duration-200"
+              >
+                <Mic className="h-4 w-4 mr-1" />
+                Voice
+              </Button>
+              
+              {/* Coins Button */}
+              <Button
+                onClick={() => setShowTreasureChest(true)}
+                className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-4 py-2 rounded-full shadow-md transform hover:scale-105 transition-all duration-200"
+              >
+                <Coins className="h-4 w-4 mr-2" />
+                {coins}
+              </Button>
+            </div>
           </div>
         </header>
 
