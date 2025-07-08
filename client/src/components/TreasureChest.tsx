@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Coins, Gift, Play, Users, Crown, X, Star, Zap } from "lucide-react";
+import { Coins, Gift, Play, Users, Crown, X, Star, Zap, Sparkles, TrendingUp } from "lucide-react";
 import { useCoin } from "../context/CoinProvider";
 import { usePremium } from "../context/PremiumProvider";
 
@@ -39,126 +39,152 @@ export default function TreasureChest({ isOpen, onClose }: TreasureChestProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-rose-50 to-pink-50 border-2 border-rose-200 shadow-2xl">
-        <CardHeader className="text-center relative">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 border-2 border-rose-200 shadow-3xl relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-4 left-4 w-8 h-8 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
+          <div className="absolute top-12 right-8 w-6 h-6 bg-orange-200 rounded-full opacity-40 animate-bounce"></div>
+          <div className="absolute bottom-16 left-8 w-4 h-4 bg-pink-200 rounded-full opacity-25 animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div className="absolute bottom-8 right-4 w-5 h-5 bg-purple-200 rounded-full opacity-30 animate-bounce" style={{animationDelay: '2s'}}></div>
+        </div>
+
+        <CardHeader className="text-center relative z-10">
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="absolute right-2 top-2 p-1 text-rose-500 hover:bg-rose-100"
+            className="absolute right-2 top-2 p-2 text-rose-500 hover:bg-rose-100 rounded-full transition-all duration-200 hover:scale-110"
           >
-            <X size={20} />
+            <X size={22} />
           </Button>
           
           {/* Animated Treasure Chest */}
-          <div className="flex justify-center mb-4">
-            <div className={`relative ${isAnimating ? 'animate-bounce' : ''}`}>
-              <div className="w-20 h-16 bg-gradient-to-br from-rose-500 to-pink-600 rounded-lg relative overflow-hidden shadow-lg">
+          <div className="flex justify-center mb-6">
+            <div className={`relative ${isAnimating ? 'animate-bounce' : ''} transform hover:scale-110 transition-transform duration-300`}>
+              <div className="w-24 h-20 bg-gradient-to-br from-rose-500 via-pink-600 to-purple-600 rounded-xl relative overflow-hidden shadow-2xl border-2 border-yellow-300">
                 {/* Chest body */}
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-rose-400 via-pink-500 to-purple-500"></div>
                 {/* Chest lid */}
-                <div className={`absolute top-0 left-0 right-0 h-6 bg-gradient-to-br from-rose-300 to-pink-400 rounded-t-lg transform-gpu transition-transform duration-500 ${isAnimating ? 'rotate-12 -translate-y-2' : ''}`}></div>
+                <div className={`absolute top-0 left-0 right-0 h-8 bg-gradient-to-br from-rose-300 via-pink-400 to-purple-400 rounded-t-xl transform-gpu transition-transform duration-500 ${isAnimating ? 'rotate-12 -translate-y-3' : ''}`}></div>
                 {/* Lock */}
-                <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white rounded-full"></div>
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-yellow-300 rounded-full border border-yellow-500 shadow-sm"></div>
                 {/* Sparkles */}
                 {isAnimating && (
                   <>
-                    <div className="absolute -top-2 -left-2 text-rose-300 animate-ping">✨</div>
-                    <div className="absolute -top-3 -right-1 text-pink-300 animate-ping" style={{animationDelay: '0.2s'}}>✨</div>
-                    <div className="absolute -top-1 left-1/2 text-rose-300 animate-ping" style={{animationDelay: '0.4s'}}>✨</div>
+                    <div className="absolute -top-3 -left-3 text-yellow-400 text-xl animate-ping">✨</div>
+                    <div className="absolute -top-4 -right-2 text-orange-400 text-lg animate-ping" style={{animationDelay: '0.2s'}}>✨</div>
+                    <div className="absolute -top-2 left-1/2 text-yellow-300 text-lg animate-ping" style={{animationDelay: '0.4s'}}>✨</div>
+                    <div className="absolute -bottom-1 -left-2 text-pink-400 text-sm animate-ping" style={{animationDelay: '0.6s'}}>✨</div>
+                    <div className="absolute -bottom-2 -right-1 text-purple-400 text-sm animate-ping" style={{animationDelay: '0.8s'}}>✨</div>
                   </>
                 )}
               </div>
             </div>
           </div>
 
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
-            Coin Store! 💰
+          <CardTitle className="text-3xl font-extrabold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            💰 Coin Store! 💰
           </CardTitle>
           
           {/* Current Balance */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-full px-6 py-2 inline-block mt-2 border border-rose-200">
-            <div className="flex items-center gap-2">
-              <Coins className="h-5 w-5 text-rose-600" />
-              <span className="font-bold text-lg text-rose-700">{coins} Coins</span>
+          <div className="bg-white/90 backdrop-blur-sm rounded-full px-8 py-3 inline-block mt-3 border-2 border-rose-300 shadow-lg">
+            <div className="flex items-center gap-3">
+              <Coins className="h-6 w-6 text-rose-600 animate-pulse" />
+              <span className="font-extrabold text-xl text-rose-700">{coins} Coins</span>
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-8 relative z-10">
           {/* Free Coin Options */}
-          <div className="space-y-3">
-            <h3 className="font-semibold text-rose-800 text-center flex items-center justify-center gap-2">
-              <Gift className="h-5 w-5" />
-              Earn Free Coins
+          <div className="space-y-4">
+            <h3 className="font-bold text-rose-800 text-center flex items-center justify-center gap-3 text-lg">
+              <div className="bg-green-100 p-2 rounded-full">
+                <Gift className="h-6 w-6 text-green-600" />
+              </div>
+              🎁 Earn Free Coins
             </h3>
             
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-4">
               <Button
                 onClick={watchAd}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-4 rounded-xl shadow-md transform hover:scale-105 transition-all duration-200"
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-2xl shadow-xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden"
               >
-                <Play className="h-5 w-5 mr-2" />
-                <div className="flex flex-col items-start">
-                  <span>Watch Ad</span>
-                  <span className="text-xs text-green-100">Get 4 coins instantly</span>
-                </div>
-                <div className="ml-auto bg-green-400 px-2 py-1 rounded-full text-xs font-bold">
-                  +4
+                {/* Animated background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent animate-pulse"></div>
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Play className="h-6 w-6" />
+                    <div className="flex flex-col items-start">
+                      <span className="text-lg">Watch Ad</span>
+                      <span className="text-sm text-green-100 font-medium">Get 4 coins instantly</span>
+                    </div>
+                  </div>
+                  <div className="bg-green-400 px-3 py-2 rounded-full text-sm font-extrabold shadow-md">
+                    +4 💰
+                  </div>
                 </div>
               </Button>
               
               <Button
                 onClick={referFriend}
-                className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-4 rounded-xl shadow-md transform hover:scale-105 transition-all duration-200"
+                className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-5 rounded-2xl shadow-xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden"
               >
-                <Users className="h-5 w-5 mr-2" />
-                <div className="flex flex-col items-start">
-                  <span>Refer Friend</span>
-                  <span className="text-xs text-blue-100">Share & earn big</span>
-                </div>
-                <div className="ml-auto bg-blue-400 px-2 py-1 rounded-full text-xs font-bold">
-                  +25
+                {/* Animated background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent animate-pulse"></div>
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Users className="h-6 w-6" />
+                    <div className="flex flex-col items-start">
+                      <span className="text-lg">Refer Friend</span>
+                      <span className="text-sm text-blue-100 font-medium">Share & earn big</span>
+                    </div>
+                  </div>
+                  <div className="bg-blue-400 px-3 py-2 rounded-full text-sm font-extrabold shadow-md">
+                    +25 🎉
+                  </div>
                 </div>
               </Button>
             </div>
           </div>
 
           {/* Coin Packs */}
-          <div className="space-y-3">
-            <h3 className="font-semibold text-rose-800 text-center flex items-center justify-center gap-2">
-              <Zap className="h-5 w-5" />
-              Coin Packs
+          <div className="space-y-4">
+            <h3 className="font-bold text-rose-800 text-center flex items-center justify-center gap-3 text-lg">
+              <div className="bg-yellow-100 p-2 rounded-full">
+                <Zap className="h-6 w-6 text-yellow-600" />
+              </div>
+              ⚡ Coin Packs
             </h3>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               {coinPacks.map((pack, index) => (
                 <div
                   key={index}
-                  className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all transform hover:scale-105 ${
+                  className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all transform hover:scale-110 shadow-lg hover:shadow-2xl ${
                     pack.popular 
-                      ? "border-rose-400 bg-gradient-to-br from-rose-100 to-pink-100 shadow-lg" 
-                      : "border-rose-300 bg-white hover:border-rose-400 hover:shadow-md"
+                      ? "border-rose-400 bg-gradient-to-br from-rose-100 via-pink-100 to-purple-100 shadow-xl" 
+                      : "border-rose-300 bg-white hover:border-rose-400 hover:shadow-xl"
                   }`}
                   onClick={() => handlePurchasePack(pack)}
                 >
                   {pack.popular && (
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full shadow-md">
-                      <Star className="h-3 w-3 inline mr-1" />
-                      Popular!
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-sm px-4 py-2 rounded-full shadow-lg animate-pulse">
+                      <Star className="h-4 w-4 inline mr-1 fill-current" />
+                      🔥 Popular!
                     </div>
                   )}
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-1 mb-2">
-                      <Coins className="h-5 w-5 text-rose-600" />
-                      <span className="font-bold text-lg text-rose-700">{pack.coins}</span>
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      <Coins className="h-6 w-6 text-rose-600 animate-pulse" />
+                      <span className="font-extrabold text-xl text-rose-700">{pack.coins}</span>
                     </div>
                     {pack.bonus && (
-                      <div className="text-xs text-green-600 font-bold mb-1">{pack.bonus}</div>
+                      <div className="text-sm text-green-600 font-bold mb-2 animate-bounce">{pack.bonus}</div>
                     )}
-                    <div className="text-xl font-bold text-rose-800">{pack.price}</div>
-                    <div className="text-xs text-rose-500 mt-1">Best Value!</div>
+                    <div className="text-2xl font-extrabold text-rose-800 mb-1">{pack.price}</div>
+                    <div className="text-sm text-rose-500 font-semibold">💎 Best Value!</div>
                   </div>
                 </div>
               ))}
@@ -167,33 +193,37 @@ export default function TreasureChest({ isOpen, onClose }: TreasureChestProps) {
 
           {/* Premium Upgrade */}
           {!isPremium && (
-            <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 text-center border-2 border-purple-200">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Crown className="h-5 w-5 text-purple-600" />
-                <span className="font-semibold text-purple-700">Go Premium!</span>
+            <div className="bg-gradient-to-r from-purple-100 via-pink-100 to-rose-100 rounded-2xl p-6 text-center border-2 border-purple-300 shadow-xl relative overflow-hidden">
+              {/* Animated background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20 animate-pulse"></div>
+              <div className="relative z-10">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <Crown className="h-7 w-7 text-purple-600 animate-bounce" />
+                <span className="font-bold text-purple-700 text-lg">👑 Go Premium!</span>
               </div>
-              <p className="text-sm text-purple-600 mb-3">
+                <p className="text-base text-purple-600 mb-4 font-medium">
                 Get unlimited chat time and never worry about coins again!
               </p>
               <Button
                 size="sm"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transform hover:scale-105 transition-all duration-200"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-xl transform hover:scale-105 transition-all duration-300 shadow-lg"
               >
-                <Crown className="h-4 w-4 mr-2" />
+                  <Crown className="h-5 w-5 mr-2" />
                 Upgrade to Premium
               </Button>
+              </div>
             </div>
           )}
 
-          <div className="text-center space-y-2">
-            <p className="text-xs text-rose-500 font-medium">
+          <div className="text-center space-y-3">
+            <p className="text-sm text-rose-600 font-bold">
               💳 Secure payments • 🔒 Safe transactions • 💯 Instant delivery
             </p>
-            <div className="flex justify-center gap-4 text-xs text-rose-400">
-              <span>✓ UPI</span>
-              <span>✓ Cards</span>
-              <span>✓ Wallets</span>
-              <span>✓ Net Banking</span>
+            <div className="flex justify-center gap-6 text-sm text-rose-500 font-semibold">
+              <span className="flex items-center gap-1">✓ UPI</span>
+              <span className="flex items-center gap-1">✓ Cards</span>
+              <span className="flex items-center gap-1">✓ Wallets</span>
+              <span className="flex items-center gap-1">✓ Net Banking</span>
             </div>
           </div>
         </CardContent>
