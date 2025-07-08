@@ -360,19 +360,164 @@ const ChatPageContent = ({
 
         {/* No Results */}
         {filteredChats.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-64 text-center px-8">
-            <div className="text-6xl mb-4">
+          <div className="flex flex-col items-center justify-center h-64 text-center px-8 py-12">
+            <div className="relative mb-6">
+              <div className="text-8xl mb-2 animate-bounce">
+                {search ? '🔍' : '💬'}
+              </div>
+              {!search && (
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 rounded-full animate-ping"></div>
+              )}
+            </div>
+            <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl p-6 border border-rose-200 shadow-sm max-w-sm">
+              <h3 className="text-xl font-bold text-gray-700 mb-3">
+                {search ? 'No chats found' : 'No chats yet'}
+              </h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                {search 
+                  ? `No results for "${search}". Try a different search term.`
+                  : 'Start a conversation to see your chats appear here! Connect with new people and build meaningful conversations.'
+                }
+              </p>
+              {!search && (
+                <Button
+                  onClick={() => navigate('/video-chat')}
+                  className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold px-6 py-2 rounded-full shadow-md transform hover:scale-105 transition-all duration-200"
+                >
+                  Start Your First Chat
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Enhanced Bottom Navigation */}
+      <BottomNavBar />
+    </div>
+  );
+};
+
+const ChatItem = ({
+  chat,
+  onChatClick,
+  onLongPress,
+  onDelete,
+  longPressedChatId,
+  setLongPressedChatId,
+  isPremium,
+  formatLastSeen,
+}: {
+  chat: Chat;
+  onChatClick: (chat: Chat) => void;
+  onLongPress: (chatId: number) => void;
+  onDelete: (chatId: number) => void;
+  longPressedChatId: number | null;
+  setLongPressedChatId: (id: number | null) => void;
+  isPremium: boolean;
+  formatLastSeen: (date: Date) => string;
+}) => {
+  return (
+    <div
+      className={`flex items-center p-4 cursor-pointer relative border-b border-rose-100 transition-all duration-200 hover:bg-rose-50 hover:shadow-md hover:scale-[1.02] ${
+        chat.isFriend ? 'bg-green-50/50' : ''
+      } ${
+        chat.unreadCount > 0 ? 'bg-rose-50 border-l-4 border-rose-500 shadow-sm' : ''
+      }`}
+      onClick={() => {
+        if (longPressedChatId !== chat.id) onChatClick(chat);
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onLongPress(chat.id);
+      }}
+    >
+      <div className="relative">
+        <img
+          src={chat.avatar}
+          alt={`${chat.name} avatar`}
+          className={`w-14 h-14 rounded-full object-cover shadow-sm transition-all duration-200 ${
+            chat.unreadCount > 0 ? 'border-3 border-rose-400' : 'border-2 border-rose-200'
+          }`}
+        />
+        {chat.unreadCount > 0 && (
+          <div className="absolute -top-1 -right-1 w-6 h-6 bg-rose-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse">
+            {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+          </div>
+        )}
+        {chat.isFriend && chat.time === 'Online' && (
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+        )}
+      </div>
+
+      <div className="ml-4 flex-1 min-w-0">
+        <div className="flex justify-between items-start mb-1">
+          <div className="flex items-center gap-2">
+            <h2 className={`truncate transition-colors duration-200 ${
+              chat.unreadCount > 0 ? 'font-bold text-rose-700 text-lg' : 'font-semibold text-gray-800'
+            }`}>
+              {chat.name}
+            </h2>
+            {chat.isFriend && (
+              <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                Friend
+              </span>
+            )}
+          </div>
+          <span className={`text-xs flex-shrink-0 ml-2 ${
+            chat.unreadCount > 0 ? 'text-rose-600 font-semibold' : 'text-gray-500'
+          }`}>
+            {chat.time}
+          </span>
+        </div>
+        
+        <p className={`text-sm truncate transition-colors duration-200 ${
+          chat.unreadCount > 0 ? 'text-gray-800 font-semibold' : 'text-gray-600'
+        }`}>
+          {chat.lastMessage}
+        </p>
+        
+        {/* Premium Feature: Last Seen */}
+        {isPremium && chat.lastSeen && chat.time !== 'Online' && (
+          <div className="flex items-center gap-1 mt-1">
+            <Clock className="h-3 w-3 text-gray-400" />
+            <span className="text-xs text-gray-400">
+              Last seen {formatLastSeen(chat.lastSeen)}
+            </span>
               {search ? '🔍' : '💬'}
             </div>
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">
-              {search ? 'No chats found' : 'No chats yet'}
-            </h3>
-            <p className="text-gray-500">
-              {search 
-                ? `No results for "${search}"`
-                : 'Start a conversation to see your chats here'
-              }
-            </p>
+        )}
+      </div>
+
+      {longPressedChatId === chat.id && (
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex gap-2">
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={e => {
+              e.stopPropagation();
+              onDelete(chat.id);
+            }}
+          >
+            Delete
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={e => {
+              e.stopPropagation();
+              setLongPressedChatId(null);
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ChatPageWrapper;
           </div>
         )}
       </div>
@@ -404,8 +549,10 @@ const ChatItem = ({
 }) => {
   return (
     <div
-      className={`flex items-center p-4 hover:bg-rose-50 cursor-pointer relative border-b border-rose-100 transition-colors duration-200 ${
+      className={`flex items-center p-4 cursor-pointer relative border-b border-rose-100 transition-all duration-200 hover:bg-rose-50 hover:shadow-md hover:scale-[1.02] ${
         chat.isFriend ? 'bg-green-50/50' : ''
+      } ${
+        chat.unreadCount > 0 ? 'bg-rose-50 border-l-4 border-rose-500 shadow-sm' : ''
       }`}
       onClick={() => {
         if (longPressedChatId !== chat.id) onChatClick(chat);
@@ -419,10 +566,12 @@ const ChatItem = ({
         <img
           src={chat.avatar}
           alt={`${chat.name} avatar`}
-          className="w-14 h-14 rounded-full object-cover border-2 border-rose-200 shadow-sm"
+          className={`w-14 h-14 rounded-full object-cover shadow-sm transition-all duration-200 ${
+            chat.unreadCount > 0 ? 'border-3 border-rose-400' : 'border-2 border-rose-200'
+          }`}
         />
         {chat.unreadCount > 0 && (
-          <div className="absolute -top-1 -right-1 w-6 h-6 bg-rose-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
+          <div className="absolute -top-1 -right-1 w-6 h-6 bg-rose-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse">
             {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
           </div>
         )}
@@ -434,7 +583,9 @@ const ChatItem = ({
       <div className="ml-4 flex-1 min-w-0">
         <div className="flex justify-between items-start mb-1">
           <div className="flex items-center gap-2">
-            <h2 className={`font-semibold text-gray-800 truncate ${chat.unreadCount > 0 ? 'text-rose-700' : ''}`}>
+            <h2 className={`truncate transition-colors duration-200 ${
+              chat.unreadCount > 0 ? 'font-bold text-rose-700 text-lg' : 'font-semibold text-gray-800'
+            }`}>
               {chat.name}
             </h2>
             {chat.isFriend && (
@@ -443,10 +594,16 @@ const ChatItem = ({
               </span>
             )}
           </div>
-          <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{chat.time}</span>
+          <span className={`text-xs flex-shrink-0 ml-2 ${
+            chat.unreadCount > 0 ? 'text-rose-600 font-semibold' : 'text-gray-500'
+          }`}>
+            {chat.time}
+          </span>
         </div>
         
-        <p className={`text-sm truncate ${chat.unreadCount > 0 ? 'text-gray-700 font-medium' : 'text-gray-600'}`}>
+        <p className={`text-sm truncate transition-colors duration-200 ${
+          chat.unreadCount > 0 ? 'text-gray-800 font-semibold' : 'text-gray-600'
+        }`}>
           {chat.lastMessage}
         </p>
         
