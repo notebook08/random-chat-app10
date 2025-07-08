@@ -42,7 +42,7 @@ const HomeScreen: React.FC = () => {
         <div className="w-full max-w-lg px-4 py-6">
         
           {/* Auto-scrolling Banner Section */}
-          <section className="w-full mb-9 relative">
+          <section className="w-full mb-6 relative">
             {/* Image container with overflow hidden */}
             <div className="overflow-hidden rounded-xl shadow-lg">
               <div
@@ -66,7 +66,7 @@ const HomeScreen: React.FC = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`h-2 w-2 rounded-full transition-all duration-300 ${
+                  className={`h-6 w-2 rounded-full transition-all duration-300 ${
                     currentImageIndex === index ? 'bg-white w-4' : 'bg-white/50'
                   }`}
                   aria-label={`Go to slide ${index + 1}`}
