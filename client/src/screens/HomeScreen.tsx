@@ -61,7 +61,7 @@ const HomeScreen: React.FC = () => {
             </div>
             
             {/* Navigation Dots for the Banner */}
-            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-5">
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
               {bannerImages.map((_, index) => (
                 <button
                   key={index}
@@ -77,7 +77,7 @@ const HomeScreen: React.FC = () => {
 
           {/* Main content */}
           <div className="w-full bg-white p-6 rounded-xl border border-gray-200 shadow-md">
-            <h2 className="text-xl font-bold text-gray-800 mb-3">Start Connecting</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-3">Milo Abhi!</h2>
             <p className="text-gray-500 mb-6">
               Jump into a conversation or discover amazing people near you.
             </p>
