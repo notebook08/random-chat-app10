@@ -1,3 +1,5 @@
+Here's the fixed script with all closing brackets added:
+
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -121,4 +123,13 @@ export default function TreasureChest({ isOpen, onClose }: TreasureChestProps) {
                       <span className="text-xs text-green-100 font-medium">Get 4 coins instantly</span>
                     </div>
                   </div>
-                  <div className="bg-green-400 px-2 py-1 rounded-full
+                  <div className="bg-green-400 px-2 py-1 rounded-full"></div>
+                </div>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
