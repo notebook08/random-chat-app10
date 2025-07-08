@@ -39,8 +39,8 @@ export default function TreasureChest({ isOpen, onClose }: TreasureChestProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 border-2 border-rose-200 shadow-3xl relative overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start justify-center z-50 p-4 overflow-y-auto">
+      <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 border-2 border-rose-200 shadow-3xl relative overflow-hidden my-4 min-h-fit max-h-[95vh]">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-4 left-4 w-8 h-8 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
@@ -96,9 +96,9 @@ export default function TreasureChest({ isOpen, onClose }: TreasureChestProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-8 relative z-10">
+        <CardContent className="space-y-6 relative z-10 overflow-y-auto max-h-[calc(95vh-200px)] pb-6">
           {/* Free Coin Options */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <h3 className="font-bold text-rose-800 text-center flex items-center justify-center gap-3 text-lg">
               <div className="bg-green-100 p-2 rounded-full">
                 <Gift className="h-6 w-6 text-green-600" />
@@ -106,10 +106,10 @@ export default function TreasureChest({ isOpen, onClose }: TreasureChestProps) {
               🎁 Earn Free Coins
             </h3>
             
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3">
               <Button
                 onClick={watchAd}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-2xl shadow-xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden"
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 rounded-2xl shadow-xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden"
               >
                 {/* Animated background */}
                 <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent animate-pulse"></div>
@@ -117,117 +117,8 @@ export default function TreasureChest({ isOpen, onClose }: TreasureChestProps) {
                   <div className="flex items-center gap-3">
                     <Play className="h-6 w-6" />
                     <div className="flex flex-col items-start">
-                      <span className="text-lg">Watch Ad</span>
-                      <span className="text-sm text-green-100 font-medium">Get 4 coins instantly</span>
+                      <span className="text-base">Watch Ad</span>
+                      <span className="text-xs text-green-100 font-medium">Get 4 coins instantly</span>
                     </div>
                   </div>
-                  <div className="bg-green-400 px-3 py-2 rounded-full text-sm font-extrabold shadow-md">
-                    +4 💰
-                  </div>
-                </div>
-              </Button>
-              
-              <Button
-                onClick={referFriend}
-                className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-5 rounded-2xl shadow-xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden"
-              >
-                {/* Animated background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent animate-pulse"></div>
-                <div className="relative z-10 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Users className="h-6 w-6" />
-                    <div className="flex flex-col items-start">
-                      <span className="text-lg">Refer Friend</span>
-                      <span className="text-sm text-blue-100 font-medium">Share & earn big</span>
-                    </div>
-                  </div>
-                  <div className="bg-blue-400 px-3 py-2 rounded-full text-sm font-extrabold shadow-md">
-                    +25 🎉
-                  </div>
-                </div>
-              </Button>
-            </div>
-          </div>
-
-          {/* Coin Packs */}
-          <div className="space-y-4">
-            <h3 className="font-bold text-rose-800 text-center flex items-center justify-center gap-3 text-lg">
-              <div className="bg-yellow-100 p-2 rounded-full">
-                <Zap className="h-6 w-6 text-yellow-600" />
-              </div>
-              ⚡ Coin Packs
-            </h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              {coinPacks.map((pack, index) => (
-                <div
-                  key={index}
-                  className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all transform hover:scale-110 shadow-lg hover:shadow-2xl ${
-                    pack.popular 
-                      ? "border-rose-400 bg-gradient-to-br from-rose-100 via-pink-100 to-purple-100 shadow-xl" 
-                      : "border-rose-300 bg-white hover:border-rose-400 hover:shadow-xl"
-                  }`}
-                  onClick={() => handlePurchasePack(pack)}
-                >
-                  {pack.popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-sm px-4 py-2 rounded-full shadow-lg animate-pulse">
-                      <Star className="h-4 w-4 inline mr-1 fill-current" />
-                      🔥 Popular!
-                    </div>
-                  )}
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                      <Coins className="h-6 w-6 text-rose-600 animate-pulse" />
-                      <span className="font-extrabold text-xl text-rose-700">{pack.coins}</span>
-                    </div>
-                    {pack.bonus && (
-                      <div className="text-sm text-green-600 font-bold mb-2 animate-bounce">{pack.bonus}</div>
-                    )}
-                    <div className="text-2xl font-extrabold text-rose-800 mb-1">{pack.price}</div>
-                    <div className="text-sm text-rose-500 font-semibold">💎 Best Value!</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Premium Upgrade */}
-          {!isPremium && (
-            <div className="bg-gradient-to-r from-purple-100 via-pink-100 to-rose-100 rounded-2xl p-6 text-center border-2 border-purple-300 shadow-xl relative overflow-hidden">
-              {/* Animated background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20 animate-pulse"></div>
-              <div className="relative z-10">
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <Crown className="h-7 w-7 text-purple-600 animate-bounce" />
-                <span className="font-bold text-purple-700 text-lg">👑 Go Premium!</span>
-              </div>
-                <p className="text-base text-purple-600 mb-4 font-medium">
-                Get unlimited chat time and never worry about coins again!
-              </p>
-              <Button
-                size="sm"
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-xl transform hover:scale-105 transition-all duration-300 shadow-lg"
-              >
-                  <Crown className="h-5 w-5 mr-2" />
-                Upgrade to Premium
-              </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="text-center space-y-3">
-            <p className="text-sm text-rose-600 font-bold">
-              💳 Secure payments • 🔒 Safe transactions • 💯 Instant delivery
-            </p>
-            <div className="flex justify-center gap-6 text-sm text-rose-500 font-semibold">
-              <span className="flex items-center gap-1">✓ UPI</span>
-              <span className="flex items-center gap-1">✓ Cards</span>
-              <span className="flex items-center gap-1">✓ Wallets</span>
-              <span className="flex items-center gap-1">✓ Net Banking</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+                  <div className="bg-green-400 px-2 py-1 rounded-full
