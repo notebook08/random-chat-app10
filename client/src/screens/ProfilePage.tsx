@@ -4,6 +4,8 @@ import { Helmet } from 'react-helmet-async';
 import BottomNavBar from '../components/BottomNavBar';
 import PremiumPaywall from '../components/PremiumPaywall';
 import LanguageSelector from '../components/LanguageSelector';
+import SettingsModal from '../components/SettingsModal';
+import HelpSupportModal from '../components/HelpSupportModal';
 import { Crown, Camera, Copy, Star, Gift, ArrowLeft, Edit3, Check, Settings, User, Globe } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { usePremium } from '../context/PremiumProvider';
@@ -21,6 +23,9 @@ const ProfilePage: React.FC = () => {
   const [isEditingUsername, setIsEditingUsername] = useState<boolean>(false);
   const [showPaywall, setShowPaywall] = useState<boolean>(false);
   const [showLanguageSelector, setShowLanguageSelector] = useState<boolean>(false);
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [settingsType, setSettingsType] = useState<'privacy' | 'notifications' | 'account' | 'general' | null>(null);
+  const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
 
   const referralId = 'AJNABICAM12345';
 
@@ -132,6 +137,11 @@ const ProfilePage: React.FC = () => {
     setPremium(true, expiry);
     setShowPaywall(false);
     alert(`🎉 Welcome to Premium! Your ${plan} subscription is now active!`);
+  };
+
+  const handleSettingsClick = (type: 'privacy' | 'notifications' | 'account' | 'general') => {
+    setSettingsType(type);
+    setShowSettingsModal(true);
   };
 
   return (
@@ -324,15 +334,24 @@ const ProfilePage: React.FC = () => {
               </h3>
               
               <div className="space-y-3">
-                <button className="w-full text-left px-6 py-4 rounded-2xl bg-rose-50 hover:bg-rose-100 transition-all duration-300 border border-rose-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]">
+                <button 
+                  onClick={() => handleSettingsClick('privacy')}
+                  className="w-full text-left px-6 py-4 rounded-2xl bg-rose-50 hover:bg-rose-100 transition-all duration-300 border border-rose-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+                >
                   <span className="text-rose-700 font-bold text-lg">{t('profile.settings.privacy')}</span>
                 </button>
                 
-                <button className="w-full text-left px-6 py-4 rounded-2xl bg-rose-50 hover:bg-rose-100 transition-all duration-300 border border-rose-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]">
+                <button 
+                  onClick={() => handleSettingsClick('notifications')}
+                  className="w-full text-left px-6 py-4 rounded-2xl bg-rose-50 hover:bg-rose-100 transition-all duration-300 border border-rose-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+                >
                   <span className="text-rose-700 font-bold text-lg">{t('profile.settings.notifications')}</span>
                 </button>
                 
-                <button className="w-full text-left px-6 py-4 rounded-2xl bg-rose-50 hover:bg-rose-100 transition-all duration-300 border border-rose-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]">
+                <button 
+                  onClick={() => handleSettingsClick('account')}
+                  className="w-full text-left px-6 py-4 rounded-2xl bg-rose-50 hover:bg-rose-100 transition-all duration-300 border border-rose-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+                >
                   <span className="text-rose-700 font-bold text-lg">{t('profile.settings.account')}</span>
                 </button>
 
@@ -342,6 +361,14 @@ const ProfilePage: React.FC = () => {
                 >
                   <Globe className="h-5 w-5 text-rose-600" />
                   <span className="text-rose-700 font-bold text-lg">{t('profile.settings.language')}</span>
+                </button>
+                
+                <button 
+                  onClick={() => setShowHelpModal(true)}
+                  className="w-full text-left px-6 py-4 rounded-2xl bg-rose-50 hover:bg-rose-100 transition-all duration-300 border border-rose-200 shadow-sm hover:shadow-md transform hover:scale-[1.02] flex items-center gap-3"
+                >
+                  <Settings className="h-5 w-5 text-rose-600" />
+                  <span className="text-rose-700 font-bold text-lg">Help & Support</span>
                 </button>
               </div>
             </div>
@@ -361,8 +388,21 @@ const ProfilePage: React.FC = () => {
         isOpen={showLanguageSelector}
         onClose={() => setShowLanguageSelector(false)}
       />
+
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => {
+          setShowSettingsModal(false);
+          setSettingsType(null);
+        }}
+        settingType={settingsType}
+      />
     </>
   );
 };
 
+      <HelpSupportModal
+        isOpen={showHelpModal}
+        onClose={() => setShowHelpModal(false)}
+      />
 export default ProfilePage;
