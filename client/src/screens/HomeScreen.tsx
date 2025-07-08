@@ -39,10 +39,10 @@ const HomeScreen: React.FC = () => {
         </header>
 
         {/* Banner and Content Area */}
-        <div className="w-full max-w-lg px-1 py-6">
+        <div className="w-full max-w-lg px-4 py-6">
         
           {/* Auto-scrolling Banner Section */}
-          <section className="w-full mb-6 relative">
+          <section className="w-full mb-9 relative">
             {/* Image container with overflow hidden */}
             <div className="overflow-hidden rounded-xl shadow-lg">
               <div
