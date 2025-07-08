@@ -61,7 +61,7 @@ const HomeScreen: React.FC = () => {
             </div>
             
             {/* Navigation Dots for the Banner */}
-            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-3">
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-5">
               {bannerImages.map((_, index) => (
                 <button
                   key={index}
