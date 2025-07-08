@@ -15,6 +15,15 @@ export default {
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
+  			'rose': {
+  				'25': '#fef7f7',
+  			},
+  			'purple': {
+  				'25': '#faf5ff',
+  			},
+  			'pink': {
+  				'25': '#fdf2f8',
+  			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
