@@ -34,12 +34,12 @@ const HomeScreen: React.FC = () => {
       <main className="flex flex-col items-center min-h-screen w-full bg-gray-50 relative pb-20">
 
         {/* Native-style Header */}
-        <header className="w-full max-w-lg bg-white p-4 border-b border-gray-200 sticky top-5 z-10">
+        <header className="w-full max-w-lg bg-white p-4 border-b border-gray-200 sticky top-0 z-10">
           <h1 className="text-2xl font-bold text-gray-800">AjnabiCam</h1>
         </header>
 
         {/* Banner and Content Area */}
-        <div className="w-full max-w-lg px-4 py-6">
+        <div className="w-full max-w-lg px-3 py-6">
         
           {/* Auto-scrolling Banner Section */}
           <section className="w-full mb-6 relative">
