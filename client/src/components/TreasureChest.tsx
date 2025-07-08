@@ -1,4 +1,3 @@
-Here's the fixed script with all closing brackets added:
 
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
