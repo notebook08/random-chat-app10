@@ -61,12 +61,12 @@ const HomeScreen: React.FC = () => {
             </div>
             
             {/* Navigation Dots for the Banner */}
-            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
               {bannerImages.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`h-6 w-2 rounded-full transition-all duration-300 ${
+                  className={`h-2 w-2 rounded-full transition-all duration-300 ${
                     currentImageIndex === index ? 'bg-white w-4' : 'bg-white/50'
                   }`}
                   aria-label={`Go to slide ${index + 1}`}
