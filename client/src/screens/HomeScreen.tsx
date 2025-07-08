@@ -39,7 +39,7 @@ const HomeScreen: React.FC = () => {
         </header>
 
         {/* Banner and Content Area */}
-        <div className="w-full max-w-lg px-3 py-6">
+        <div className="w-full max-w-lg px-1 py-6">
         
           {/* Auto-scrolling Banner Section */}
           <section className="w-full mb-6 relative">
