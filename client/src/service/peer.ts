@@ -92,28 +92,3 @@ class PeerService {
 
 const peerservice = new PeerService();
 export default peerservice;
-            const offer = await this.peer.createOffer();
-            await this.peer.setLocalDescription(new RTCSessionDescription(offer));
-            return this.peer.localDescription;
-        }
-        
-    }
-
-    async getAnswer(offer: RTCSessionDescriptionInit){
-        if(this.peer){
-            await this.peer.setRemoteDescription(offer);
-            const answer = await this.peer.createAnswer();
-            await this.peer.setLocalDescription(new RTCSessionDescription(answer));
-            return this.peer.localDescription;
-        }
-    }
-
-    async setRemoteDescription(answer: RTCSessionDescriptionInit){
-        if(this.peer){
-            await this.peer.setRemoteDescription(new RTCSessionDescription(answer));
-        }
-    }
-}
-
-const peerservice = new PeerService();
-export default peerservice;
