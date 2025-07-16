@@ -11,11 +11,19 @@
     "install:server": "cd server && npm install",
     "install:all": "npm run install:client && npm run install:server"
   },
-  "keywords": ["video-chat", "random-chat", "webrtc", "socket.io"],
+  "keywords": [
+    "video-chat",
+    "random-chat",
+    "webrtc",
+    "socket.io"
+  ],
   "author": "AjnabiCam Team",
   "license": "MIT",
   "workspaces": [
     "client",
     "server"
-  ]
+  ],
+  "dependencies": {
+    "firebase": "^11.10.0"
+  }
 }
