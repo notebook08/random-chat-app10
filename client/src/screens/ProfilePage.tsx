@@ -397,12 +397,13 @@ const ProfilePage: React.FC = () => {
         }}
         settingType={settingsType}
       />
-    </>
-  );
-};
 
       <HelpSupportModal
         isOpen={showHelpModal}
         onClose={() => setShowHelpModal(false)}
       />
+    </>
+  );
+};
+
 export default ProfilePage;

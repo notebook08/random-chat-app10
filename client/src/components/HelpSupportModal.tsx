@@ -98,16 +98,36 @@ export default function HelpSupportModal({ isOpen, onClose }: HelpSupportModalPr
             </h3>
             <div className="space-y-3">
               {contactMethods.map((method, index) => (
-                <div key={index} className={`p-4 rounded-xl border-2 border-${method.color}-200 bg-${method.color}-50 hover:shadow-md transition-all duration-200 cursor-pointer`}>
+                <div key={index} className={`p-4 rounded-xl border-2 hover:shadow-md transition-all duration-200 cursor-pointer ${
+                  method.color === 'blue' ? 'border-blue-200 bg-blue-50' :
+                  method.color === 'green' ? 'border-green-200 bg-green-50' :
+                  'border-purple-200 bg-purple-50'
+                }`}>
                   <div className="flex items-center gap-3">
-                    <div className={`bg-${method.color}-100 p-2 rounded-full`}>
+                    <div className={`p-2 rounded-full ${
+                      method.color === 'blue' ? 'bg-blue-100' :
+                      method.color === 'green' ? 'bg-green-100' :
+                      'bg-purple-100'
+                    }`}>
                       {method.icon}
                     </div>
                     <div className="flex-1">
-                      <h4 className={`font-semibold text-${method.color}-800`}>{method.title}</h4>
-                      <p className={`text-sm text-${method.color}-600`}>{method.description}</p>
+                      <h4 className={`font-semibold ${
+                        method.color === 'blue' ? 'text-blue-800' :
+                        method.color === 'green' ? 'text-green-800' :
+                        'text-purple-800'
+                      }`}>{method.title}</h4>
+                      <p className={`text-sm ${
+                        method.color === 'blue' ? 'text-blue-600' :
+                        method.color === 'green' ? 'text-green-600' :
+                        'text-purple-600'
+                      }`}>{method.description}</p>
                     </div>
-                    <div className={`text-${method.color}-700 font-mono text-sm`}>
+                    <div className={`font-mono text-sm ${
+                      method.color === 'blue' ? 'text-blue-700' :
+                      method.color === 'green' ? 'text-green-700' :
+                      'text-purple-700'
+                    }`}>
                       {method.action}
                     </div>
                   </div>

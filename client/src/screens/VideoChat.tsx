@@ -210,8 +210,21 @@ export default function VideoChat() {
         }
       });
       setMyStream(stream);
+      return stream;
     } catch (error) {
       console.error("Error getting user media:", error);
+      // Fallback to basic audio only if full request fails
+      try {
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({
+          video: false,
+          audio: true
+        });
+        setMyStream(fallbackStream);
+        return fallbackStream;
+      } catch (fallbackError) {
+        console.error("Fallback media access also failed:", fallbackError);
+        throw fallbackError;
+      }
     }
   }, [isVoiceOnly]);
 
@@ -741,31 +754,38 @@ export default function VideoChat() {
   }, [isPremium, remoteChatToken, socket]);
 
   const handleCleanup = useCallback(() => {
-    if (myStream) {
-      myStream.getTracks().forEach((track) => {
-        track.stop();
-      });
-      setMyStream(null);
-    }
+    try {
+      if (myStream) {
+        myStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+        setMyStream(null);
+      }
 
-    if (screenStream) {
-      screenStream.getTracks().forEach((track) => {
-        track.stop();
-      });
-      setScreenStream(null);
-      setIsScreenSharing(false);
-    }
+      if (screenStream) {
+        screenStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+        setScreenStream(null);
+        setIsScreenSharing(false);
+      }
 
-    if (socket) {
-      socket.disconnect();
-    }
+      if (remoteStream) {
+        remoteStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+        setRemoteStream(null);
+      }
 
-    if (peerservice.peer.signalingState !== "closed") {
-      peerservice.peer.close();
-      peerservice.initPeer();
+      if (peerservice.peer && peerservice.peer.signalingState !== "closed") {
+        peerservice.peer.close();
+        peerservice.initPeer();
+      }
+    } catch (error) {
+      console.error('Error during cleanup:', error);
+    } finally {
+      navigate("/");
     }
-
-    navigate("/");
   }, [myStream, navigate, screenStream, socket]);
 
   const handleReport = (reason: string) => {

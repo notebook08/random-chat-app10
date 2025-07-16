@@ -22,14 +22,26 @@ export const SocketProvider = ({children} : {children: ReactNode}) => {
 
     useEffect(() => {
         if (!socket) {
-            const socketUrl = import.meta.env.VITE_API_SERVER_URL || 
-                `http://${window.location.hostname.replace(/--\d+--/, '--80--')}`;
+            // Determine socket URL based on environment
+            let socketUrl: string;
+            
+            if (import.meta.env.VITE_API_SERVER_URL) {
+                socketUrl = import.meta.env.VITE_API_SERVER_URL;
+            } else if (window.location.hostname === 'localhost') {
+                socketUrl = 'http://localhost:8000';
+            } else {
+                // For production or other environments
+                socketUrl = `http://${window.location.hostname}:8000`;
+            }
             
             const newSocket = io(socketUrl, {
                 transports: ['websocket', 'polling'],
                 secure: false,
                 timeout: 20000,
-                forceNew: true
+                forceNew: true,
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
             });
 
             newSocket.on('connect', () => {
@@ -42,6 +54,14 @@ export const SocketProvider = ({children} : {children: ReactNode}) => {
 
             newSocket.on('connect_error', (error) => {
                 console.error('Socket connection error:', error);
+            });
+
+            newSocket.on('reconnect', (attemptNumber) => {
+                console.log('Socket reconnected after', attemptNumber, 'attempts');
+            });
+
+            newSocket.on('reconnect_error', (error) => {
+                console.error('Socket reconnection error:', error);
             });
 
             setSocket(newSocket);

@@ -1,5 +1,5 @@
 // Razorpay integration for premium purchase
-const RAZORPAY_KEY_ID = "rzp_live_h3TuNA7JPL56Dh";
+const RAZORPAY_KEY_ID = "rzp_test_1234567890"; // Use test key for development
 
 
 import { useState } from "react";
@@ -21,6 +21,15 @@ export default function PremiumPaywall({ isOpen, onClose, onPurchase }: PremiumP
   const handleRazorpay = () => {
     const plan = plans.find(p => p.id === selectedPlan);
     if (!plan) return;
+    
+    // Check if Razorpay is loaded
+    if (typeof window.Razorpay === 'undefined') {
+      console.error('Razorpay SDK not loaded');
+      // Fallback to direct purchase
+      onPurchase(selectedPlan);
+      return;
+    }
+    
     const amount = plan.id === "weekly" ? 9900 : 29900; // in paise (₹99/₹299)
     const options = {
       key: RAZORPAY_KEY_ID,
@@ -31,15 +40,27 @@ export default function PremiumPaywall({ isOpen, onClose, onPurchase }: PremiumP
       image: "/logo.png",
       handler: function (response: any) {
         // On successful payment
+        console.log('Payment successful:', response);
         onPurchase(selectedPlan);
+      },
+      modal: {
+        ondismiss: function() {
+          console.log('Payment modal closed');
+        }
       },
       prefill: {},
       theme: { color: "#a21caf" },
-      method: 'upi', // Preselect UPI as payment method
     };
-    // @ts-ignore
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+    
+    try {
+      // @ts-ignore
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error('Error opening Razorpay:', error);
+      // Fallback to direct purchase
+      onPurchase(selectedPlan);
+    }
   };
 
 

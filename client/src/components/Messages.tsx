@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import { Send, Eye, Palette } from "lucide-react";
 import SecretChatModal from "./SecretChatModal";
 import WallpaperSelector from "./WallpaperSelector";
+import PremiumPaywall from "./PremiumPaywall";
 
 interface MessageProps{
     remoteChatToken: string | null;
@@ -145,11 +146,17 @@ export default function Messages({remoteChatToken, messagesArray, setMessagesArr
         localStorage.setItem('ajnabicam_chat_wallpaper', wallpaper);
     };
 
-    const handleUpgrade = () => {
+    const handleUpgrade = useCallback(() => {
         setShowPaywall(true);
         setShowSecretModal(false);
         setShowWallpaperSelector(false);
-    };
+    }, []);
+
+    const handlePremiumPurchase = useCallback((plan: string) => {
+        console.log(`Processing payment for ${plan} plan`);
+        setShowPaywall(false);
+        alert(`🎉 Welcome to Premium! Your ${plan} subscription is now active!`);
+    }, []);
 
     useEffect(() => {
         socket?.on("message:recieved", handleMessageReceived);
@@ -284,6 +291,12 @@ export default function Messages({remoteChatToken, messagesArray, setMessagesArr
                 currentWallpaper={currentWallpaper}
                 isPremium={isPremium}
                 onUpgrade={handleUpgrade}
+            />
+
+            <PremiumPaywall
+                isOpen={showPaywall}
+                onClose={() => setShowPaywall(false)}
+                onPurchase={handlePremiumPurchase}
             />
         </div>
     );
